@@ -1,0 +1,11 @@
+@baseUrl = http://localhost:7071/api
+
+### Start Orchestration
+# @name startWorkRequest
+
+GET {{baseUrl}}/Sequential_Trigger?duration=30
+
+@statusUri = {{startWorkRequest.response.body.$.statusQueryGetUri}}
+
+### Get Workflow Status
+GET {{statusUri}}

@@ -1,0 +1,51 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to build Azure Function and create artifacts
+# ----------------------------------------------------------------------------------------------------
+parameters: 
+- name: variableGroupName
+  default:  'myVariableGroup'
+- name: environmentName
+  default:  'DEV'
+
+# ----------------------------------------------------------------------------------------------------
+jobs:
+- deployment: InitializeBuild${{ parameters.environmentName }}Function
+  displayName: Initialize ${{ parameters.environmentName }} Build Function
+  environment: ${{ parameters.environmentName }}
+
+- job: Build${{ parameters.environmentName }}Function
+  displayName: Build ${{ parameters.environmentName }} Function
+  
+  variables:
+    - group: ${{ parameters.variableGroupName }}
+
+  steps:
+  - bash: |
+      echo "Build.ArtifactStagingDirectory=$(Build.ArtifactStagingDirectory)"
+      echo "System.DefaultWorkingDirectory=$(System.DefaultWorkingDirectory)"
+      echo "Build.BuildId=$(Build.BuildId)"
+      echo "appPrefix=$(appPrefix)"
+    continueOnError: true
+    displayName: 'Display Variables'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build project'
+    inputs:
+      projects: 'src/Durable.Demo/*.csproj'
+      arguments: '--output publish_output --configuration Release'
+
+  - task: ArchiveFiles@2
+    displayName: 'Zip Output'
+    inputs:
+      rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/$(appPrefix)$(Build.BuildId).zip
+      replaceExistingArchive: true
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Artifact'
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifact: drop
+      publishLocation: 'pipeline'

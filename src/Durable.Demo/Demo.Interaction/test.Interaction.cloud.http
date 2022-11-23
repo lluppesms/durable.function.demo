@@ -1,0 +1,24 @@
+# Install Extension Rest-Client to use this file
+#   https://github.com/Huachao/vscode-restclient
+
+@baseUrl = https://lll-durable-demo.azurewebsites.net/api
+
+### Start Orchestration
+# @name startWorkRequest
+
+POST {{baseUrl}}/Interaction_Trigger HTTP/1.1
+content-type: text/plain
+
+9522376401
+
+### ---------------------------------------------------------------------------
+### Look at the response of the previous request and go get the "sendEventPostUri"
+### Copy that URL after the "POST" below and replace {eventName} with "SmsChallengeResponse"
+### ------------------------------------------------------------------------------> Replace {eventName} with "SmsChallengeResponse"
+### Look in the logs for the SMS code that was sent to your phone
+### Replace that in the body text below and click on Send Request
+
+POST https://lll-durabledemo-dev.azurewebsites.net/runtime/webhooks/durabletask/instances/e7180777abe749e4ab5fc84b63cfb6c6/raiseEvent/SmsChallengeResponse?taskHub=llldurabledemodev&connection=Storage&code=JvCVr5UfDLpXg7FxNWpth93g0xNPHzEHUrEDpYuSWHEsAzFuCKtbPA==
+Content-type: application/json
+
+9497

@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Durable.Test.Harness": {
+      "commandName": "Project"
+    }
+  }
+}

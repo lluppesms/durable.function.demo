@@ -1,0 +1,23 @@
+# To use this file, install the VS Code extension Rest-Client 
+#   https://github.com/Huachao/vscode-restclient
+
+@baseUrl = http://localhost:7071/api
+
+### Start Orchestration
+# @name startWorkRequest
+
+POST {{baseUrl}}/Interaction_Trigger HTTP/1.1
+content-type: text/plain
+
++19522376401
+
+### ---------------------------------------------------------------------------
+### Look at the response of the previous request to find the status URL, and then 
+### and get the "sendEventPostUri" URLCopy that URL after the "POST" below and replace {eventName} with "SmsChallengeResponse"
+### Look in the logs for the SMS code that was sent to a phone, and put that in the body text below the post
+### then click on Send Request
+
+POST http://localhost:7071/runtime/webhooks/durabletask/instances/48b843a8f0bd4390be55b3261c4a2796/raiseEvent/SmsChallengeResponse?taskHub=TestHubName&connection=Storage&code=aR4E_Ui2HbdJApXMom1SWxS4GgqvjreO7sEUZoAeBwBGAzFuq1wJ8Q==
+Content-type: application/json
+
+7853

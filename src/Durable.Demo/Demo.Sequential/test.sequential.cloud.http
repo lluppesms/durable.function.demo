@@ -1,0 +1,11 @@
+@baseUrl = https://lll-durabledemo-dev.azurewebsites.net/api
+
+### Start Orchestration
+# @name startWorkRequest
+
+GET {{baseUrl}}/Sequential_Trigger?duration=60
+
+@statusUri = {{startWorkRequest.response.body.$.statusQueryGetUri}}
+
+### Get Workflow Status
+GET {{statusUri}}

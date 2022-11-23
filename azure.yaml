@@ -1,0 +1,18 @@
+# ----------------------------------------------------------------------------------------------------
+# Pipeline used by the azd command
+# ----------------------------------------------------------------------------------------------------
+name: durable.function.demo
+
+infra:
+    provider: bicep
+    path: infra
+    module: main
+
+pipeline:
+    provider: github
+
+services:
+  function:
+    project: src/Durable.Demo/
+    language: csharp
+    host: function

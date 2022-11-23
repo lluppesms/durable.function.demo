@@ -1,0 +1,7 @@
+﻿{
+  "EnvironmentCode": "DEV",
+  "FunctionUrl": "https://lll-durabledemo-dev.azurewebsites.net/api",
+  "FunctionUrl-local": "http://localhost:7071/api",
+  "FunctionUrl-cloud": "https://lll-durabledemo-dev.azurewebsites.net/api",
+  "PhoneNumber":  "+19522376401"
+}

@@ -1,0 +1,32 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline to build IoT Simulator; compiles for both Windows (x64) and Linux; copies EXE to storage for downloading ease
+# ------------------------------------------------------------------------------------------------------------------------
+# Note: This pipeline needs a variable group "DurableDemo"
+#  See ../Docs/Create-Variable-Group.md for details
+# ------------------------------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: windows-latest
+
+# ----------------------------------------------------------------------------------------------------
+trigger:
+  # since this repo has both AzDO and GHA pipelines, nothing is run automatically...
+  - none
+  # batch: true
+  # branches:
+  #   include: 
+  #     - main
+  # paths:
+  #   include:
+  #     - Simulator
+  #   exclude: 
+  #     - '**/*.yml'
+  #     - '**/*.yaml'
+  #     - '**/*.bicep'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- template: pipes/console-app-pipe.yml
+  parameters:
+    variableGroupName: 'DurableDemo'
+    environments: ['DEMO']  # ['DEV','PROD'] ['DEV','QA'] or ['DEV','QA','PROD']
