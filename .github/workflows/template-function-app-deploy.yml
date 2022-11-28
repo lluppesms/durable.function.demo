@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------------------------------------------------
-# GHA Reusable Called Workflow to deploy an already built Function App to Azure
+# GHA Reusable Called Workflow to deploy an already built Function App
 # ------------------------------------------------------------------------------------------------------------------------
 # You need to set up secrets in the GitHub Secrets Repository before running these workflows.
 #   See Docs\CreateGitHubSecrets\.md for details
@@ -22,11 +22,15 @@ jobs:
     environment:
       name: ${{ inputs.envCode }}
 
+    env:
+      artifactName: functionapp
+      generatedAppEnvName: '${{ secrets.APP_NAME }}-${{ inputs.envCode }}'
+
     steps:
     - name: Download build artifacts
       uses: actions/download-artifact@v3
       with:
-        name: functionapp
+        name: ${{ env.artifactName }}
 
     # - name: List Files
     #   run: 
@@ -38,8 +42,8 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Deploy package to Azure Function
+    - name: Deploy Azure Function Zip
       uses: Azure/functions-action@v1
       with:
-        app-name: ${{ secrets.APP_NAME }}-${{ inputs.envCode }}
+        app-name: ${{ env.generatedAppEnvName }}
         package: .
