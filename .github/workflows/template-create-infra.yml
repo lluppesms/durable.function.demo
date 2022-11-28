@@ -83,13 +83,12 @@ jobs:
         resourceGroupName: ${{ env.generatedResourceGroupName }}
         template: infra/Bicep/main.bicep
         parameters: >
-          environmentCode='${{ inputs.envCode }}'
-          location='${{ inputs.location }}'
-          appName='${{ secrets.APP_NAME }}'
-          storageSku='${{ inputs.storageSku }}'
-          functionAppSku='${{ inputs.functionAppSku }}'
-          functionAppSkuFamily='${{ inputs.functionAppSkuFamily }}'
-          functionAppSkuTier='${{ inputs.functionAppSkuTier }}'
-          keyVaultOwnerUserId='${{ secrets.KEYVAULT_OWNER_USERID }}'
-      #continue-on-error: true
+          environmentCode=${{ inputs.envCode }}
+          location=${{ inputs.location }}
+          appName=${{ secrets.APP_NAME }}
+          keyVaultOwnerUserId=${{ secrets.KEYVAULT_OWNER_USERID }}
+          storageSku=${{ inputs.storageSku }}
+          functionAppSku=${{ inputs.functionAppSku }}
+          functionAppSkuFamily=${{ inputs.functionAppSkuFamily }}
+          functionAppSkuTier=${{ inputs.functionAppSkuTier }}
       
