@@ -32,13 +32,13 @@ jobs:
       functionAppSkuFamily: 'Y'
       functionAppSkuTier: 'Dynamic'
 
-  # infra-qa:
-  #   name: Create QA Infra
+  # infra-dev:
+  #   name: Create DEV Infra
   #   needs: infra-demo
   #   uses: ./.github/workflows/template-create-infra.yml
   #   secrets: inherit
   #   with:
-  #     envCode: 'qa'
+  #     envCode: 'dev'
   #     location: 'eastus'
   #     storageSku: 'Standard_LRS'
   #     functionAppSku: 'Y1'

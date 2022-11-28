@@ -37,12 +37,14 @@ jobs:
       name: ${{ inputs.envCode }}
     
     env:
-      resourceGroupName: rg-${{ secrets.APP_NAME }}-${{ inputs.envCode }}
+      generatedAppEnvName: '${{ secrets.APP_NAME }}-${{ inputs.envCode }}'
+      generatedResourceGroupName: 'rg-${{ secrets.APP_NAME }}-${{ inputs.envCode }}'
 
     steps:
     - name: Display Variables
       run: |-
-        echo "resourceGroupName=${{ env.resourceGroupName }}"
+        echo "generatedAppEnvName=${{ env.generatedAppEnvName }}"
+        echo "generatedResourceGroupName=${{ env.generatedResourceGroupName }}"
         echo "appName=${{ secrets.APP_NAME }}"
         echo "location=${{ inputs.location }}"
         echo "storageSku=${{ inputs.storageSku }}"
@@ -50,9 +52,9 @@ jobs:
         echo "functionAppSkuFamily=${{ inputs.functionAppSkuFamily }}"
         echo "functionAppSkuTier=${{ inputs.functionAppSkuTier }}"
         echo "Resource Group Command:"
-        echo "  az group create --name ${{ env.resourceGroupName }} --location ${{ inputs.location }} --tags Application=${{ secrets.APP_NAME }} Environment=${{ inputs.envCode }}"
+        echo "  az group create --name ${{ env.generatedResourceGroupName }} --location ${{ inputs.location }} --tags Application=${{ secrets.APP_NAME }} Environment=${{ inputs.envCode }}"
         echo "Bicep Deploy Sample Command:"
-        echo "  az deployment group create -n main-deploy-${{ env.runDateTimeZ }} --resource-group ${{ env.resourceGroupName }} --template-file 'main.bicep' --parameters environment=${{ inputs.envCode }} location=${{ inputs.location }} appName=${{ secrets.APP_NAME }} keyVaultOwnerUserId=${{ env.keyVaultOwnerUserId }}"
+        echo "  az deployment group create -n main-deploy-${{ env.runDateTimeZ }} --resource-group ${{ env.generatedResourceGroupName }} --template-file 'main.bicep' --parameters environment=${{ inputs.envCode }} location=${{ inputs.location }} appName=${{ secrets.APP_NAME }} keyVaultOwnerUserId=${{ env.keyVaultOwnerUserId }}"
         echo "Pipeline Workspace Directory Contents:"
         tree ${{ env.GITHUB_ACTION_PATH }}
       continue-on-error: true
@@ -72,20 +74,22 @@ jobs:
 
     - name: Create Resource Group
       run: 
-        az group create --name ${{ env.resourceGroupName }} --location ${{ inputs.location }} --tags Environment=${{ inputs.envCode }} Application=${{ secrets.APP_NAME }}
+        az group create --name ${{ env.generatedResourceGroupName }} --location ${{ inputs.location }} --tags Environment=${{ inputs.envCode }} Application=${{ secrets.APP_NAME }}
 
     - name: Deploy Azure Resources
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        resourceGroupName: ${{ env.resourceGroupName }}
+        resourceGroupName: ${{ env.generatedResourceGroupName }}
         template: infra/Bicep/main.bicep
         parameters: >
-          environmentCode=${{ inputs.envCode }} 
-          location=${{ inputs.location }} 
-          appName=${{ secrets.APP_NAME }} 
-          storageSku=${{ inputs.storageSku }} 
-          functionAppSku=${{ inputs.functionAppSku }} 
+          environmentCode=${{ inputs.envCode }}
+          location=${{ inputs.location }}
+          appName=${{ secrets.APP_NAME }}
+          storageSku=${{ inputs.storageSku }}
+          functionAppSku=${{ inputs.functionAppSku }}
           functionAppSkuFamily=${{ inputs.functionAppSkuFamily }}
-          functionAppSkuTier=${{ inputs.functionAppSkuTier }} 
+          functionAppSkuTier=${{ inputs.functionAppSkuTier }}
           keyVaultOwnerUserId=${{ secrets.KEYVAULT_OWNER_USERID }}
+      continue-on-error: true
+      
