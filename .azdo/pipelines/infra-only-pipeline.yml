@@ -27,4 +27,4 @@ stages:
 - template: pipes/infra-only-pipe.yml
   parameters:
     variableGroupName: 'DurableDemo'
-    environments: ['DEMO']  # ['DEV','PROD'] ['DEV','QA'] or ['DEV','QA','PROD']
+    environments: ['DEV','QA','PROD']  # ['DEMO'] ['DEV','PROD'] ['DEV','QA'] or ['DEV','QA','PROD']
