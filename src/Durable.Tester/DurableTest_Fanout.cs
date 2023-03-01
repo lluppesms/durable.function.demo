@@ -8,7 +8,7 @@ public partial class DurableTest
         timer.Start();
         try
         {
-            Utilities.DisplayMessage($"\nStarting Fan Out Test...", ConsoleColor.Yellow);
+            Utilities.DisplayMessage($"\n{DateTime.Now:hh:mm:ss} Starting Fan Out Test...", ConsoleColor.Yellow);
             var url = $"{config.FunctionUrl}/{Constants.FunctionUrlSuffix.Fanout}";
             var durableInstance = await Utilities.StartDurableFunction(url, string.Empty, Constants.TriggerMethod.GET);
             var status = await Utilities.CheckDurableStatus(durableInstance.statusQueryGetUri, true);
@@ -20,20 +20,20 @@ public partial class DurableTest
                 status = await Utilities.CheckDurableStatus(durableInstance.statusQueryGetUri, true, i);
                 if (status.runtimeStatus == "Completed")
                 {
-                    Utilities.DisplayMessage($"    Process complete!", ConsoleColor.Green);
+                    Utilities.DisplayMessage($"    {DateTime.Now:hh:mm:ss} Process complete!", ConsoleColor.Green);
                     break;
                 }
             }
             if (status.runtimeStatus != "Completed")
             {
-                Utilities.DisplayMessage($"    Process failed!", ConsoleColor.Red);
+                Utilities.DisplayMessage($"    {DateTime.Now:hh:mm:ss} Process failed!", ConsoleColor.Red);
             }
             Utilities.DisplayCompletionMessage(timer);
             return true;
         }
         catch (Exception ex)
         {
-            Utilities.DisplayErrorMessage($"Error running FanOut Test: {Utilities.GetExceptionMessage(ex)}");
+            Utilities.DisplayErrorMessage($"{DateTime.Now:hh:mm:ss} Error running FanOut Test: {Utilities.GetExceptionMessage(ex)}");
             Utilities.DisplayCompletionMessage(timer);
             return false;
         }

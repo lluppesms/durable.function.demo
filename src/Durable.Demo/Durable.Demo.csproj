@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="4.0.5" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Twilio" Version="3.0.2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Logging.ApplicationInsights" Version="3.0.34" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.3" />
   </ItemGroup>
   <ItemGroup>

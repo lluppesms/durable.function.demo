@@ -154,7 +154,7 @@ public partial class DurableTest
         var phoneNumber = config.PhoneNumber;
         if (string.IsNullOrEmpty(phoneNumber))
         {
-            Utilities.DisplayMessage($"\nPlease enter a phone number to send the verification code to:", ConsoleColor.Cyan);
+            Utilities.DisplayMessage($"\n{DateTime.Now:hh:mm:ss} Please enter a phone number to send the verification code to:", ConsoleColor.Cyan);
             phoneNumber = GetNumericInput(true);
             phoneNumber = phoneNumber.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
             Utilities.DisplayMessage(string.Empty);
@@ -164,7 +164,7 @@ public partial class DurableTest
 
     private static string GetVerificationCodeFromUser()
     {
-        Utilities.DisplayMessage($"\nPlease enter the verification code sent to phone :", ConsoleColor.Cyan);
+        Utilities.DisplayMessage($"\n{DateTime.Now:hh:mm:ss} Please enter the verification code sent to phone :", ConsoleColor.Cyan);
         var verificationCode = GetNumericInput();
         Utilities.DisplayMessage(string.Empty);
         return verificationCode;

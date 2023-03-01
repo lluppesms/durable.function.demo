@@ -55,6 +55,22 @@ public static partial class Utilities
     }
 
     /// <summary>
+    /// Display a time stamped console message with colors and send to log file
+    /// </summary>
+    public static void DisplayTimeStampedMessage(string message, ConsoleColor color, bool writeToLog = true)
+    {
+        ConsoleColor previousColor = Console.ForegroundColor;
+        Console.ForegroundColor = color;
+        Console.WriteLine($"{DateTime.Now:hh:mm:ss} {message}");
+        Console.ForegroundColor = previousColor;
+        //Console.ResetColor();
+        if (writeToLog)
+        {
+            WriteToLogFile(message);
+        }
+    }
+
+    /// <summary>
     /// Display a console message with colors and send to log file
     /// </summary>
     public static void DisplayMessage(string message, ConsoleColor color, bool writeToLog = true)
@@ -190,6 +206,6 @@ public static partial class Utilities
     public static void DisplayCompletionMessage(Stopwatch timer, string message = "Completed in")
     {
         timer.Stop();
-        Utilities.DisplayMessage($"    {message} {timer.ElapsedMilliseconds} milliseconds!", ConsoleColor.Cyan);
+        Utilities.DisplayMessage($"    {message} {timer.ElapsedMilliseconds} milliseconds! {DateTime.Now:hh:mm:ss} ", ConsoleColor.Cyan);
     }
 }

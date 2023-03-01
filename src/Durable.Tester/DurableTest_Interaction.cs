@@ -8,14 +8,14 @@ public partial class DurableTest
         timer.Start();
         try
         {
-            Utilities.DisplayMessage($"\nStarting User Interaction Durable Function...", ConsoleColor.Green);
+            Utilities.DisplayMessage($"\n{DateTime.Now:hh:mm:ss} Starting User Interaction Durable Function...", ConsoleColor.Green);
             var url = $"{config.FunctionUrl}/{Constants.FunctionUrlSuffix.Interaction}";
             var phoneNumber = GetPhoneNumberFromUser();
 
             var durableInstance = await Utilities.StartDurableFunction(url, phoneNumber);
             if (durableInstance != null)
             {
-                Utilities.DisplayMessage($"    Interaction ID: {durableInstance.id}", ConsoleColor.Blue);
+                Utilities.DisplayMessage($"    {DateTime.Now:hh:mm:ss} Interaction ID: {durableInstance.id}", ConsoleColor.Blue);
 
                 var status = await Utilities.CheckDurableStatus(durableInstance.statusQueryGetUri, true);
 
@@ -29,13 +29,13 @@ public partial class DurableTest
                         Thread.Sleep(1000);
                         if (status.runtimeStatus == "Completed")
                         {
-                            Utilities.DisplayMessage($"    Verification complete!", ConsoleColor.Green);
+                            Utilities.DisplayMessage($"    {DateTime.Now:hh:mm:ss} Verification complete!", ConsoleColor.Green);
                             break;
                         }
                     }
                     if (status.runtimeStatus != "Completed")
                     {
-                        Utilities.DisplayMessage($"    Verification process failed!", ConsoleColor.Red);
+                        Utilities.DisplayMessage($"    {DateTime.Now:hh:mm:ss} Verification process failed!", ConsoleColor.Red);
                     }
                 }
                 Utilities.DisplayCompletionMessage(timer);
@@ -46,7 +46,7 @@ public partial class DurableTest
         }
         catch (Exception ex)
         {
-            Utilities.DisplayErrorMessage($"Error running Interaction Test: {Utilities.GetExceptionMessage(ex)}");
+            Utilities.DisplayErrorMessage($"{DateTime.Now:hh:mm:ss} Error running Interaction Test: {Utilities.GetExceptionMessage(ex)}");
             Utilities.DisplayCompletionMessage(timer);
             return false;
         }
