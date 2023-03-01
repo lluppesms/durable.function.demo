@@ -27,7 +27,7 @@ parameters:
   default: 'myVariableGroupName'
 - name: environmentName
   default:  'DEV'
-- name: project
+- name: projectPath
   default: 'src/myFolderName/myProjectName.csproj'
 - name: exeName
   default: 'myExeName'
@@ -62,13 +62,13 @@ jobs:
   
     - task: NuGetCommand@2
       inputs:
-        restoreSolution: '$(project)'
+        restoreSolution: '$(projectPath)'
         #restoreSolution: '$(solution)'
 
     - task: VSBuild@1
       displayName: 'Build Program'
       inputs:
-        solution: '$(project)'
+        solution: '$(projectPath)'
         #solution: '$(solution)'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
@@ -84,7 +84,7 @@ jobs:
       displayName: Create win-x64 package
       inputs:
         command: publish
-        projects: '$(project)'
+        projects: '$(projectPath)'
         #projects: '$(solution)'
         packDirectory: 
         publishWebProjects: false
@@ -126,7 +126,7 @@ jobs:
       displayName: Create Linux package
       inputs:
         command: publish
-        projects: '$(project)'
+        projects: '$(projectPath)'
         #projects: '$(solution)'
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
