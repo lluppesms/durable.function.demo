@@ -34,14 +34,23 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- template: pipes/infra-and-function-pipe.yml
-  parameters:
-    variableGroupName: 'DurableDemo'
 - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
-    environments: ['DEV','QA','PROD']
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV','QA','PROD']
 - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'false')) }}:
-    environments: ['DEV','QA']
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV','QA']
 - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'true')) }}:
-    environments: ['DEV','PROD']
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV','PROD']
 - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'false')) }}:
-    environments: ['DEV']
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV']
