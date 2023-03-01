@@ -22,9 +22,23 @@ trigger:
   #   include:
   #     - 'Durable.Demo/*'
 
+parameters:
+  - name: deployQA
+    displayName: Deploy to QA
+    type: boolean
+    default: false
+
+# ----------------------------------------------------------------------------------------------------
+# This approach works but it's not DRY
 # ----------------------------------------------------------------------------------------------------
 stages:
-- template: pipes/infra-and-function-pipe.yml
-  parameters:
-    variableGroupName: 'DurableDemo'
-    environments: ['DEV','QA','PROD']  # ['DEMO'] ['DEV','PROD'] ['DEV','QA'] or ['DEV','QA','PROD']
+- ${{ if eq(lower(parameters.deployQA), 'false') }}:
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV']
+- ${{ if eq(lower(parameters.deployQA), 'true') }}:
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV','QA']
