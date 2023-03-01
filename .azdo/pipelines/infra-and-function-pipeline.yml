@@ -34,21 +34,25 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- variables:
-    thisVariableGroup: 'DurableDemo'
-- ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
-    theseEnvironments: ['DEV','QA','PROD']
-- ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'false')) }}:
-    theseEnvironments: ['DEV','QA']
-- ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'true')) }}:
-    theseEnvironments: ['DEV','PROD']
-- ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'false')) }}:
-    theseEnvironments: ['DEV']
+- stage:
+  - variables:
+      thisVariableGroup: 'DurableDemo'
+  - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
+      theseEnvironments: ['DEV','QA','PROD']
+  - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'false')) }}:
+      theseEnvironments: ['DEV','QA']
+  - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'true')) }}:
+      theseEnvironments: ['DEV','PROD']
+  - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'false')) }}:
+      theseEnvironments: ['DEV']
 
-- template: pipes/infra-and-function-pipe.yml
-  parameters:
-    variableGroupName: thisVariableGroup
-    environments: theseEnvironments
+- stage: MainPipeline
+  displayName: MainPipeline
+  jobs:
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: thisVariableGroup
+      environments: theseEnvironments
 
 
 # # ----------------------------------------------------------------------------------------------------
