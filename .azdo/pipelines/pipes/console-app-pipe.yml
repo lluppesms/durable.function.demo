@@ -7,6 +7,12 @@ parameters:
   default: ['DEV']
 - name: variableGroupName
   default: 'myVariableGroupName'
+- name: project
+  value: 'src/myFolderName/myProjectName.csproj'
+- name: exeName
+  value: 'myExeName'
+- name: folderName
+  value: 'myFolderName'
 - name: runDevSecOpsScan
   default: 'true'
 - name: runPsRuleScan
@@ -38,3 +44,6 @@ stages:
       parameters:
         variableGroupName: ${{ parameters.variableGroupName }}
         environmentName: ${{ environmentName }}
+        project: $(project)
+        exeName: $(exeName)
+        folderName: $(folderName)

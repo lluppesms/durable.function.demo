@@ -27,6 +27,12 @@ parameters:
   default: 'myVariableGroupName'
 - name: environmentName
   default:  'DEV'
+- name: project
+  value: 'src/myFolderName/myProjectName.csproj'
+- name: exeName
+  value: 'myExeName'
+- name: folderName
+  value: 'myFolderName'
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
@@ -34,14 +40,14 @@ jobs:
 
     variables:
       - group: CodeSigning
-      - name: solution
-        value: 'src/Durable.Tester/*.sln'
       - name: buildPlatform
         value: 'Any CPU'
-      - name: exeName
-        value: Durable.Tester
       - name: buildConfiguration
         value: 'Release'
+      # - name: solution
+      #   value: 'src/Durable.Tester/*.sln'
+      # - name: exeName
+      #   value: Durable.Tester
 
     steps:
     - task: NuGetToolInstaller@1
@@ -56,12 +62,14 @@ jobs:
   
     - task: NuGetCommand@2
       inputs:
-        restoreSolution: '$(solution)'
+        restoreSolution: '$(project)'
+        #restoreSolution: '$(solution)'
 
     - task: VSBuild@1
       displayName: 'Build Program'
       inputs:
-        solution: '$(solution)'
+        solution: '$(project)'
+        #solution: '$(solution)'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
@@ -76,7 +84,8 @@ jobs:
       displayName: Create win-x64 package
       inputs:
         command: publish
-        projects: '$(solution)'
+        projects: '$(project)'
+        #projects: '$(solution)'
         packDirectory: 
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)/packages'
@@ -96,7 +105,7 @@ jobs:
         targetType: 'inline'
         script: |
           cd $(build.artifactstagingdirectory)/packages
-          azuresigntool sign Durable.Tester/$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
+          azuresigntool sign $(folderName)/$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
       continueOnError: true
 
     - task: PowerShell@2
@@ -109,7 +118,7 @@ jobs:
           cd Deploy
           md win-x64
           cd ..
-          move Durable.Tester/$(exeName).exe $(build.artifactstagingdirectory)/packages/Deploy/win-x64/
+          move $(folderName)/$(exeName).exe $(build.artifactstagingdirectory)/packages/Deploy/win-x64/
         errorActionPreference: 'continue'
         failOnStderr: false
 
@@ -117,7 +126,8 @@ jobs:
       displayName: Create Linux package
       inputs:
         command: publish
-        projects: '$(solution)'
+        projects: '$(project)'
+        #projects: '$(solution)'
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
         zipAfterPublish: false
@@ -131,7 +141,7 @@ jobs:
           cd Deploy
           md Linux
           cd ..
-          move Durable.Tester/$(exeName) $(build.artifactstagingdirectory)/packages/Deploy/Linux/
+          move $(folderName)/$(exeName) $(build.artifactstagingdirectory)/packages/Deploy/Linux/
         errorActionPreference: 'continue'
         failOnStderr: false
 
