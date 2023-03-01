@@ -35,15 +35,19 @@ parameters:
 variables:
 - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
   - name: selectedEnvironments
+    type: object
     value: ['DEV','QA','PROD']
 - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'false')) }}:
   - name: selectedEnvironments
+    type: object
     value: ['DEV','QA']
 - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'true')) }}:
   - name: selectedEnvironments
+    type: object
     value: ['DEV','PROD']
 - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'false')) }}:
   - name: selectedEnvironments
+    type: object
     value: ['DEV']
 
 # ----------------------------------------------------------------------------------------------------
