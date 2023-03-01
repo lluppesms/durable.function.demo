@@ -22,9 +22,33 @@ trigger:
   #   include:
   #     - 'Durable.Demo/*'
 
+parameters:
+  - name: deployQA
+    displayName: Deploy to QA
+    type: boolean
+    default: false
+  - name: deployProd
+    displayName: Deploy to Prod
+    type: boolean
+    default: false
+
 # ----------------------------------------------------------------------------------------------------
 stages:
+- variables:
+  - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
+    - name: selectedEnvironments
+      value: ['DEV','QA','PROD']
+  - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'false')) }}:
+    - name: selectedEnvironments
+      value: ['DEV','QA']
+  - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'true')) }}:
+    - name: selectedEnvironments
+      value: ['DEV','PROD']
+  - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'false')) }}:
+    - name: selectedEnvironments
+      value: ['DEV']
+
 - template: pipes/infra-and-function-pipe.yml
   parameters:
     variableGroupName: 'DurableDemo'
-    environments: ['DEV','QA','PROD']  # ['DEMO'] ['DEV','PROD'] ['DEV','QA'] or ['DEV','QA','PROD']
+    environments: selectedEnvironments # ['DEV','QA','PROD']
