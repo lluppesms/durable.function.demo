@@ -24,6 +24,7 @@ trigger:
   #     - '**/*.yaml'
   #     - '**/*.bicep'
 
+# ----------------------------------------------------------------------------------------------------
 parameters:
   - name: runDevSecOpsScan
     displayName: Run MS DevSecOps Scan

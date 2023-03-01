@@ -22,6 +22,7 @@ trigger:
   #     - '**/*.yaml'
   #     - '**/*.bicep'
 
+# ----------------------------------------------------------------------------------------------------
 parameters:
   - name: deployQA
     displayName: Deploy to QA
@@ -36,6 +37,8 @@ parameters:
     type: boolean
     default: false
 
+# ----------------------------------------------------------------------------------------------------
+# This approach to optionally deploy QA works but it's not DRY
 # ----------------------------------------------------------------------------------------------------
 stages:
 - ${{ if eq(lower(parameters.deployQA), 'false') }}:
