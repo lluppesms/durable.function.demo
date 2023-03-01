@@ -27,56 +27,18 @@ parameters:
     displayName: Deploy to QA
     type: boolean
     default: false
-  - name: deployProd
-    displayName: Deploy to Prod
-    type: boolean
-    default: false
 
 # ----------------------------------------------------------------------------------------------------
+# This approach works but it's not DRY
+# ----------------------------------------------------------------------------------------------------
 stages:
-- stage: BuildVariables
-  jobs: 
-  - variables:
-      thisVariableGroup: 'DurableDemo'
-  - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
-      theseEnvironments: ['DEV','QA','PROD']
-  - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'false')) }}:
-      theseEnvironments: ['DEV','QA']
-  - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'true')) }}:
-      theseEnvironments: ['DEV','PROD']
-  - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'false')) }}:
-      theseEnvironments: ['DEV']
-
-- stage: MainPipeline
-  displayName: MainPipeline
-  jobs:
+- ${{ if eq(lower(parameters.deployQA), 'false') }}:
   - template: pipes/infra-and-function-pipe.yml
     parameters:
-      variableGroupName: thisVariableGroup
-      environments: theseEnvironments
-
-
-# # ----------------------------------------------------------------------------------------------------
-# # This approach works but it's not DRY
-# # ----------------------------------------------------------------------------------------------------
-# stages:
-# - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
-#   - template: pipes/infra-and-function-pipe.yml
-#     parameters:
-#       variableGroupName: 'DurableDemo'
-#       environments: ['DEV','QA','PROD']
-# - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'false')) }}:
-#   - template: pipes/infra-and-function-pipe.yml
-#     parameters:
-#       variableGroupName: 'DurableDemo'
-#       environments: ['DEV','QA']
-# - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'true')) }}:
-#   - template: pipes/infra-and-function-pipe.yml
-#     parameters:
-#       variableGroupName: 'DurableDemo'
-#       environments: ['DEV','PROD']
-# - ${{ if and(eq(lower(parameters.deployQA), 'false'), eq(lower(parameters.deployProd), 'false')) }}:
-#   - template: pipes/infra-and-function-pipe.yml
-#     parameters:
-#       variableGroupName: 'DurableDemo'
-#       environments: ['DEV']
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV']
+- ${{ if eq(lower(parameters.deployQA), 'true') }}:
+  - template: pipes/infra-and-function-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV','QA']
