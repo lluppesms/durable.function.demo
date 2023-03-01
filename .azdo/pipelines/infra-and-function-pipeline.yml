@@ -32,9 +32,7 @@ parameters:
     type: boolean
     default: false
 
-# ----------------------------------------------------------------------------------------------------
-stages:
-- variables:
+variables:
   - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
     - name: selectedEnvironments
       value: ['DEV','QA','PROD']
@@ -48,6 +46,8 @@ stages:
     - name: selectedEnvironments
       value: ['DEV']
 
+# ----------------------------------------------------------------------------------------------------
+stages:
 - template: pipes/infra-and-function-pipe.yml
   parameters:
     variableGroupName: 'DurableDemo'
