@@ -34,7 +34,8 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- stage:
+- stage: BuildVariables
+  jobs: 
   - variables:
       thisVariableGroup: 'DurableDemo'
   - ${{ if and(eq(lower(parameters.deployQA), 'true'), eq(lower(parameters.deployProd), 'true')) }}:
