@@ -119,7 +119,8 @@ public static class MyLogger
             if (!string.IsNullOrEmpty(AppInsightsInstrumentationKey))
             {
                 var cfg = TelemetryConfiguration.CreateDefault();
-                cfg.InstrumentationKey = AppInsightsInstrumentationKey;
+                //cfg.InstrumentationKey = AppInsightsInstrumentationKey; // deprecated - move to connection string... https://learn.microsoft.com/en-us/azure/azure-monitor/app/migrate-from-instrumentation-keys-to-connection-strings
+                cfg.ConnectionString = $"InstrumentationKey={AppInsightsInstrumentationKey}";
                 appInsightsClient = new TelemetryClient(cfg);
                 return true;
             }
