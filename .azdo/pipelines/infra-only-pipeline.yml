@@ -22,9 +22,33 @@ trigger:
   #     - '**/*.yaml'
   #     - '**/*.bicep'
 
+parameters:
+  - name: deployQA
+    displayName: Deploy to QA
+    type: boolean
+    default: false
+  - name: runDevSecOpsScan
+    displayName: Run MS DevSecOps Scan
+    type: boolean
+    default: false
+  - name: runPsRuleScan
+    displayName: Run PSRule Bicep Scan
+    type: boolean
+    default: false
+
 # ----------------------------------------------------------------------------------------------------
 stages:
-- template: pipes/infra-only-pipe.yml
-  parameters:
-    variableGroupName: 'DurableDemo'
-    environments: ['DEV','QA','PROD']  # ['DEMO'] ['DEV','PROD'] ['DEV','QA'] or ['DEV','QA','PROD']
+- ${{ if eq(lower(parameters.deployQA), 'false') }}:
+  - template: pipes/infra-only-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV']
+      runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
+      runPsRuleScan: ${{ parameters.runPsRuleScan }}
+- ${{ if eq(lower(parameters.deployQA), 'true') }}:
+  - template: pipes/infra-only-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV','QA']
+      runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
+      runPsRuleScan: ${{ parameters.runPsRuleScan }}

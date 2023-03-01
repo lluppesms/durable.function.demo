@@ -13,10 +13,13 @@ stages:
 - stage: BuildApplication
   displayName: Build Application
   jobs:
-  - template: templates/secure-devops-template.yml
-    parameters:
-      variableGroupName: ${{ parameters.variableGroupName }}
-      environmentName: 'DEV'
+  - ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
+    - template: templates/scan-code-template.yml
+      parameters:
+        variableGroupName: ${{ parameters.variableGroupName }}
+        environmentName: 'DEV'
+        runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
+        runPsRuleScan: ${{ parameters.runPsRuleScan }}
 
   - template: templates/build-function-template.yml
     parameters:
