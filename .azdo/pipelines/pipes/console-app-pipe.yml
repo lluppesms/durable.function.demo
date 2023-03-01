@@ -20,7 +20,6 @@ stages:
   - ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
     - template: templates/scan-code-template.yml
       parameters:
-        variableGroupName: ${{ parameters.variableGroupName }}
         environmentName: 'DEV'
         runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
         runPsRuleScan: ${{ parameters.runPsRuleScan }}
