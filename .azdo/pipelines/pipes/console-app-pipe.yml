@@ -7,16 +7,22 @@ parameters:
   default: ['DEV']
 - name: variableGroupName
   default: 'myVariableGroupName'
+- name: runDevSecOpsScan
+  default: 'true'
+- name: runPsRuleScan
+  default: 'true'
 
 # ------------------------------------------------------------------------------------------------------------------------
 stages:
 - stage: BuildTester
   displayName: Build Tester
   jobs:
-  - template: templates/secure-devops-template.yml
-    parameters:
-      variableGroupName: ${{ parameters.variableGroupName }}
-      environmentName: 'DEV'
+  - ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
+    - template: templates/scan-code-template.yml
+      parameters:
+        environmentName: 'DEV'
+        runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
+        runPsRuleScan: ${{ parameters.runPsRuleScan }}
 
   - template: templates/console-app-build-template.yml
     parameters:

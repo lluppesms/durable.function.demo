@@ -27,6 +27,14 @@ parameters:
     displayName: Deploy to QA
     type: boolean
     default: false
+  - name: runDevSecOpsScan
+    displayName: Run MS DevSecOps Scan
+    type: boolean
+    default: false
+  - name: runPsRuleScan
+    displayName: Run PSRule Bicep Scan
+    type: boolean
+    default: false
 
 # ----------------------------------------------------------------------------------------------------
 # This approach works but it's not DRY
@@ -37,8 +45,12 @@ stages:
     parameters:
       variableGroupName: 'DurableDemo'
       environments: ['DEV']
+      runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
+      runPsRuleScan: ${{ parameters.runPsRuleScan }}
 - ${{ if eq(lower(parameters.deployQA), 'true') }}:
   - template: pipes/infra-and-function-pipe.yml
     parameters:
       variableGroupName: 'DurableDemo'
       environments: ['DEV','QA']
+      runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
+      runPsRuleScan: ${{ parameters.runPsRuleScan }}
