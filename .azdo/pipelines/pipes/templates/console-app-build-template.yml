@@ -28,11 +28,11 @@ parameters:
 - name: environmentName
   default:  'DEV'
 - name: project
-  value: 'src/myFolderName/myProjectName.csproj'
+  default: 'src/myFolderName/myProjectName.csproj'
 - name: exeName
-  value: 'myExeName'
+  default: 'myExeName'
 - name: folderName
-  value: 'myFolderName'
+  default: 'myFolderName'
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:

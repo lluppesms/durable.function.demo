@@ -8,11 +8,11 @@ parameters:
 - name: variableGroupName
   default: 'myVariableGroupName'
 - name: project
-  value: 'src/myFolderName/myProjectName.csproj'
+  default: 'src/myFolderName/myProjectName.csproj'
 - name: exeName
-  value: 'myExeName'
+  default: 'myExeName'
 - name: folderName
-  value: 'myFolderName'
+  default: 'myFolderName'
 - name: runDevSecOpsScan
   default: 'true'
 - name: runPsRuleScan
