@@ -7,6 +7,10 @@ parameters:
   default: ['DEV']
 - name: variableGroupName
   default: 'myVariableGroupName'
+- name: runDevSecOpsScan
+  default: 'true'
+- name: runPsRuleScan
+  default: 'true'
 
 # ----------------------------------------------------------------------------------------------------
 stages:
