@@ -28,16 +28,19 @@ parameters:
 - name: environmentName
   default:  'DEV'
 - name: projectPath
-  default: 'src/myFolderName/myProjectName.csproj'
-- name: exeName
-  default: 'myExeName'
+  default: 'src/'
 - name: folderName
   default: 'myFolderName'
+- name: solutionName
+  default: 'mySolutionName.sln'
+- name: projectName
+  default: 'myProjectName.csproj'
+- name: exeName
+  default: 'myExeName'
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
   - job: Build
-
     variables:
       - group: CodeSigning
       - name: buildPlatform
@@ -47,15 +50,40 @@ jobs:
       - name: variableGroupName
         value: ${{ parameters.variableGroupName }}
       - name: environmentName
-        value:  ${{ parameters.environmentName }}
+        value: ${{ parameters.environmentName }}
       - name: projectPath
         value: ${{ parameters.projectPath }}
+      - name: solutionName
+        value: ${{ parameters.solutionName }}
+      - name: projectName
+        value: ${{ parameters.projectName }}
+      - name: solutionPathName
+        value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.solutionName }}'
+      - name: projectPathName
+        value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.projectName }}'
       - name: exeName
         value: ${{ parameters.exeName }}
       - name: folderName
         value: ${{ parameters.folderName }}
 
     steps:
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "variableGroupName=$(variableGroupName)"
+          echo "environmentName=$(environmentName)"
+          echo "projectPath=$(projectPath)"
+          echo "folderName=$(folderName)"
+          echo "solutionName=$(solutionName)"
+          echo "projectName=$(projectName)"
+          echo "solutionPathName=$(solutionPathName)"
+          echo "projectPathName=$(projectPathName)"
+          echo "exeName=$(exeName)"
+          echo "Directory of projectPath:"
+          dir "$(projectPath)" /s
+      displayName: 'Display Variables and Tree'
+      continueOnError: true
+
     - task: NuGetToolInstaller@1
 
     - task: DotNetCoreCLI@2
@@ -67,30 +95,17 @@ jobs:
       continueOnError: true
   
     - task: NuGetCommand@2
+      displayName: 'NuGet Restore'
       inputs:
-        restoreSolution: $(projectPath)
-        #restoreSolution: '$(solution)'
-
-    - task: CmdLine@2
-      inputs:
-        script: |
-          echo "variableGroupName=$(variableGroupName)"
-          echo "environmentName=$(environmentName)"
-          echo "projectPath=$(projectPath)"
-          echo "exeName=$(exeName)"
-          echo "folderName=$(folderName)"
-          echo "Directory of pipeline workspace:"
-          dir $(Pipeline.Workspace) /s
-      displayName: 'Display Variables and Tree'
-      continueOnError: true
+        restoreSolution: '$(solutionPathName)'
 
     - task: VSBuild@1
       displayName: 'Build Program'
       inputs:
-        solution: $(projectPath)
-        #solution: '$(solution)'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
+        solution: $(solutionPathName)
+        platform: $(buildPlatform)
+        configuration: $(buildConfiguration)
+      continueOnError: true
 
     #- task: VSTest@2
     #  displayName: 'Test Program'
@@ -103,8 +118,7 @@ jobs:
       displayName: Create win-x64 package
       inputs:
         command: publish
-        projects: $(projectPath)
-        #projects: '$(solution)'
+        projects: $(projectPathName)
         packDirectory: 
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)/packages'
@@ -137,8 +151,7 @@ jobs:
       displayName: Create Linux package
       inputs:
         command: publish
-        projects: $(projectPath)
-        #projects: '$(solution)'
+        projects: $(projectPathName)
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
         zipAfterPublish: false

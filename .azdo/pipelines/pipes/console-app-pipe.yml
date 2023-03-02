@@ -8,7 +8,11 @@ parameters:
 - name: variableGroupName
   default: 'myVariableGroupName'
 - name: projectPath
-  default: 'src/myFolderName/myProjectName.csproj'
+  default: 'src/myFolderName/'
+- name: solutionName
+  default: 'myProjectName.sln'
+- name: projectName
+  default: 'myProjectName.csproj'
 - name: exeName
   default: 'myExeName'
 - name: folderName
@@ -34,9 +38,11 @@ stages:
     parameters:
       variableGroupName: ${{ parameters.variableGroupName }}
       environmentName: 'DEV'
-      projectPath: $(projectPath)
-      exeName: $(exeName)
-      folderName: $(folderName)
+      projectPath: ${{ parameters.projectPath }}
+      solutionName: ${{ parameters.solutionName }}
+      projectName: ${{ parameters.projectName }}
+      exeName: ${{ parameters.exeName }}
+      folderName: ${{ parameters.folderName }}
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ each environmentName in parameters.environments }} :
