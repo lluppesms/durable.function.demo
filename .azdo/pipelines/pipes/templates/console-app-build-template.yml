@@ -67,22 +67,6 @@ jobs:
         value: ${{ parameters.folderName }}
 
     steps:
-    - task: NuGetToolInstaller@1
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Install AzureSignTool'
-      inputs:
-        command: custom
-        custom: tool
-        arguments: 'install --global azuresigntool'
-      continueOnError: true
-  
-    - task: NuGetCommand@2
-      displayName: 'NuGet Restore'
-      inputs:
-        #restoreSolution: $(projectPath)
-        restoreSolution: '$(solutionPath)'
-
     - task: CmdLine@2
       inputs:
         script: |
@@ -131,16 +115,37 @@ jobs:
       displayName: 'Display Bash Variables and Tree'
       continueOnError: true
 
+    - task: NuGetToolInstaller@1
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Install AzureSignTool'
+      inputs:
+        command: custom
+        custom: tool
+        arguments: 'install --global azuresigntool'
+      continueOnError: true
+  
+    - task: NuGetCommand@2
+      displayName: 'NuGet 1 Restore'
+      inputs:
+        #restoreSolution: $(projectPath)
+        restoreSolution: '$(solutionPathName)'
+
     - task: VSBuild@1
-      displayName: 'Build Program'
+      displayName: 'Build 1 Program'
       inputs:
         solution: $(solutionPathName)
         platform: $(buildPlatform)
         configuration: $(buildConfiguration)
       continueOnError: true
 
+    - task: NuGetCommand@2
+      displayName: 'NuGet 2 Restore'
+      inputs:
+        restoreSolution: 'src/Durable.Demo/Durable.Demo.sln'
+
     - task: VSBuild@1
-      displayName: 'Build Program2'
+      displayName: 'Build 2 Program'
       inputs:
         solution: 'src/Durable.Demo/Durable.Demo.sln'
         platform: $(buildPlatform)

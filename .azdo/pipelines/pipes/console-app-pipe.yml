@@ -38,11 +38,11 @@ stages:
     parameters:
       variableGroupName: ${{ parameters.variableGroupName }}
       environmentName: 'DEV'
-      projectPath: $(projectPath)
-      solutionName: $(solutionName)
-      projectName: $(projectName)
-      exeName: $(exeName)
-      folderName: $(folderName)
+      projectPath: ${{ parameters.projectPath }}
+      solutionName: ${{ parameters.solutionName }}
+      projectName: ${{ parameters.projectName }}
+      exeName: ${{ parameters.exeName }}
+      folderName: ${{ parameters.$(folderName }}
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ each environmentName in parameters.environments }} :
