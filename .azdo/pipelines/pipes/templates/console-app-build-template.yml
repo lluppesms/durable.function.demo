@@ -28,11 +28,15 @@ parameters:
 - name: environmentName
   default:  'DEV'
 - name: projectPath
-  default: 'src/myFolderName/myProjectName.csproj'
-- name: exeName
-  default: 'myExeName'
+  default: 'src/'
 - name: folderName
   default: 'myFolderName'
+- name: solutionName
+  default: 'mySolutionName.sln'
+- name: projectName
+  default: 'myProjectName.csproj'
+- name: exeName
+  default: 'myExeName'
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
@@ -50,6 +54,14 @@ jobs:
         value:  ${{ parameters.environmentName }}
       - name: projectPath
         value: ${{ parameters.projectPath }}
+      - name: solutionName
+        value: ${{ parameters.solutionName }}
+      - name: projectName
+        value: ${{ parameters.projectName }}
+      - name: solutionPathName
+        value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.solutionName }}'
+      - name: projectPathName
+        value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.projectName }}'
       - name: exeName
         value: ${{ parameters.exeName }}
       - name: folderName
@@ -67,9 +79,10 @@ jobs:
       continueOnError: true
   
     - task: NuGetCommand@2
+      displayName: 'NuGet Restore'
       inputs:
-        restoreSolution: $(projectPath)
-        #restoreSolution: '$(solution)'
+        #restoreSolution: $(projectPath)
+        restoreSolution: '$(solutionPath)'
 
     - task: CmdLine@2
       inputs:
@@ -77,20 +90,38 @@ jobs:
           echo "variableGroupName=$(variableGroupName)"
           echo "environmentName=$(environmentName)"
           echo "projectPath=$(projectPath)"
-          echo "exeName=$(exeName)"
           echo "folderName=$(folderName)"
+          echo "solutionName=$(solutionName)"
+          echo "projectName=$(projectName)"
+          echo "solutionPathName=$(solutionPathName)"
+          echo "projectPathName=$(projectPathName)"
+          echo "exeName=$(exeName)"
           echo "Directory of pipeline workspace:"
           dir $(Pipeline.Workspace) /s
       displayName: 'Display Variables and Tree'
       continueOnError: true
 
+    - bash: |
+        echo "variableGroupName=$(variableGroupName)"
+        echo "environmentName=$(environmentName)"
+        echo "projectPath=$(projectPath)"
+        echo "folderName=$(folderName)"
+        echo "solutionName=$(solutionName)"
+        echo "projectName=$(projectName)"
+        echo "solutionPathName=$(solutionPathName)"
+        echo "projectPathName=$(projectPathName)"
+        echo "exeName=$(exeName)"
+        echo "Directory of pipeline workspace:"
+        dir $(Pipeline.Workspace) /s
+      displayName: 'Display Bash Variables and Tree'
+      continueOnError: true
+
     - task: VSBuild@1
       displayName: 'Build Program'
       inputs:
-        solution: $(projectPath)
-        #solution: '$(solution)'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
+        solution: $(solutionPathName)
+        platform: $(buildPlatform)
+        configuration: $(buildConfiguration)
 
     #- task: VSTest@2
     #  displayName: 'Test Program'
@@ -103,8 +134,7 @@ jobs:
       displayName: Create win-x64 package
       inputs:
         command: publish
-        projects: $(projectPath)
-        #projects: '$(solution)'
+        projects: $(projectPathName)
         packDirectory: 
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)/packages'
@@ -138,7 +168,7 @@ jobs:
       inputs:
         command: publish
         projects: $(projectPath)
-        #projects: '$(solution)'
+        #projects: '$(solutionPath)'
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
         zipAfterPublish: false

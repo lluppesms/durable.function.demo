@@ -41,8 +41,10 @@ stages:
   parameters:
     variableGroupName: 'DurableDemo'
     environments: ['DEV']
-    projectPath: 'src/Durable.Tester/Durable.Tester.csproj'
-    exeName: Durable.Tester
-    folderName: Durable.Tester
+    projectPath: 'src/'
+    folderName: 'Durable.Tester'
+    projectName: 'Durable.Tester.csproj'
+    solutionName: 'Durable.Tester.sln'
+    exeName: 'Durable.Tester'
     runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
     runPsRuleScan: ${{ parameters.runPsRuleScan }}
