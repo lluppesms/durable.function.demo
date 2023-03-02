@@ -42,7 +42,7 @@ stages:
       solutionName: ${{ parameters.solutionName }}
       projectName: ${{ parameters.projectName }}
       exeName: ${{ parameters.exeName }}
-      folderName: ${{ parameters.$(folderName }}
+      folderName: ${{ parameters.folderName }}
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ each environmentName in parameters.environments }} :
