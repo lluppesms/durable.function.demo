@@ -79,24 +79,9 @@ jobs:
           echo "solutionPathName=$(solutionPathName)"
           echo "projectPathName=$(projectPathName)"
           echo "exeName=$(exeName)"
-          echo "---------- Directory of pipeline workspace:"
-          dir $(Pipeline.Workspace) /s
-          echo "---------- Directory of projectPath:"
+          echo "Directory of projectPath:"
           dir "$(projectPath)" /s
       displayName: 'Display Variables and Tree'
-      continueOnError: true
-
-    - bash: |
-        echo "variableGroupName=$(variableGroupName)"
-        echo "environmentName=$(environmentName)"
-        echo "projectPath=$(projectPath)"
-        echo "folderName=$(folderName)"
-        echo "solutionName=$(solutionName)"
-        echo "projectName=$(projectName)"
-        echo "solutionPathName=$(solutionPathName)"
-        echo "projectPathName=$(projectPathName)"
-        echo "exeName=$(exeName)"
-      displayName: 'Display Bash Variables and Tree'
       continueOnError: true
 
     - task: NuGetToolInstaller@1
