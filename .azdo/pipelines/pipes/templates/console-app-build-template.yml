@@ -79,19 +79,10 @@ jobs:
           echo "solutionPathName=$(solutionPathName)"
           echo "projectPathName=$(projectPathName)"
           echo "exeName=$(exeName)"
-          echo "projectPath2=$(projectPath2)"
-          echo "folderName2=$(folderName2)"
-          echo "solutionName2=$(solutionName2)"
-          echo "projectName2=$(projectName2)"
-          echo "solutionPathName2=$(solutionPathName2)"
-          echo "projectPathName2=$(projectPathName2)"
-          echo "exeName2=$(exeName2)"
           echo "---------- Directory of pipeline workspace:"
           dir $(Pipeline.Workspace) /s
           echo "---------- Directory of projectPath:"
-          dir $(projectPath) /s
-          echo "---------- Directory of projectPath2:"
-          dir $(projectPath2) /s
+          dir "$(projectPath)" /s
       displayName: 'Display Variables and Tree'
       continueOnError: true
 
@@ -105,13 +96,6 @@ jobs:
         echo "solutionPathName=$(solutionPathName)"
         echo "projectPathName=$(projectPathName)"
         echo "exeName=$(exeName)"
-        echo "projectPath2=$(projectPath2)"
-        echo "folderName2=$(folderName2)"
-        echo "solutionName2=$(solutionName2)"
-        echo "projectName2=$(projectName2)"
-        echo "solutionPathName2=$(solutionPathName2)"
-        echo "projectPathName2=$(projectPathName2)"
-        echo "exeName2=$(exeName2)"
       displayName: 'Display Bash Variables and Tree'
       continueOnError: true
 
@@ -126,28 +110,14 @@ jobs:
       continueOnError: true
   
     - task: NuGetCommand@2
-      displayName: 'NuGet 1 Restore'
+      displayName: 'NuGet Restore'
       inputs:
-        #restoreSolution: $(projectPath)
         restoreSolution: '$(solutionPathName)'
 
     - task: VSBuild@1
-      displayName: 'Build 1 Program'
+      displayName: 'Build Program'
       inputs:
         solution: $(solutionPathName)
-        platform: $(buildPlatform)
-        configuration: $(buildConfiguration)
-      continueOnError: true
-
-    - task: NuGetCommand@2
-      displayName: 'NuGet 2 Restore'
-      inputs:
-        restoreSolution: 'src/Durable.Demo/Durable.Demo.sln'
-
-    - task: VSBuild@1
-      displayName: 'Build 2 Program'
-      inputs:
-        solution: 'src/Durable.Demo/Durable.Demo.sln'
         platform: $(buildPlatform)
         configuration: $(buildConfiguration)
       continueOnError: true
@@ -196,8 +166,7 @@ jobs:
       displayName: Create Linux package
       inputs:
         command: publish
-        projects: $(projectPath)
-        #projects: '$(solutionPath)'
+        projects: $(projectPathName)
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
         zipAfterPublish: false
