@@ -51,19 +51,19 @@ jobs:
         value: ${{ parameters.variableGroupName }}
       - name: environmentName
         value: ${{ parameters.environmentName }}
-      - name: projectPath2
+      - name: projectPath
         value: ${{ parameters.projectPath }}
-      - name: solutionName2
+      - name: solutionName
         value: ${{ parameters.solutionName }}
-      - name: projectName2
+      - name: projectName
         value: ${{ parameters.projectName }}
-      - name: solutionPathName2
+      - name: solutionPathName
         value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.solutionName }}'
-      - name: projectPathName2
+      - name: projectPathName
         value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.projectName }}'
-      - name: exeName2
+      - name: exeName
         value: ${{ parameters.exeName }}
-      - name: folderName2
+      - name: folderName
         value: ${{ parameters.folderName }}
 
     steps:
