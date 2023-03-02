@@ -44,10 +44,16 @@ jobs:
         value: 'Any CPU'
       - name: buildConfiguration
         value: 'Release'
-      # - name: solution
-      #   value: 'src/Durable.Tester/*.sln'
-      # - name: exeName
-      #   value: Durable.Tester
+      - name: variableGroupName
+        value: ${{ parameters.variableGroupName }}
+      - name: environmentName
+        value:  ${{ parameters.environmentName }}
+      - name: projectPath
+        value: ${{ parameters.projectPath }}
+      - name: exeName
+        value: ${{ parameters.exeName }}
+      - name: folderName
+        value: ${{ parameters.folderName }}
 
     steps:
     - task: NuGetToolInstaller@1
