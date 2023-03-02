@@ -41,7 +41,6 @@ parameters:
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
   - job: Build
-
     variables:
       - group: CodeSigning
       - name: buildPlatform
@@ -51,20 +50,20 @@ jobs:
       - name: variableGroupName
         value: ${{ parameters.variableGroupName }}
       - name: environmentName
-        value:  ${{ parameters.environmentName }}
-      - name: projectPath
+        value: ${{ parameters.environmentName }}
+      - name: projectPath2
         value: ${{ parameters.projectPath }}
-      - name: solutionName
+      - name: solutionName2
         value: ${{ parameters.solutionName }}
-      - name: projectName
+      - name: projectName2
         value: ${{ parameters.projectName }}
-      - name: solutionPathName
+      - name: solutionPathName2
         value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.solutionName }}'
-      - name: projectPathName
+      - name: projectPathName2
         value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.projectName }}'
-      - name: exeName
+      - name: exeName2
         value: ${{ parameters.exeName }}
-      - name: folderName
+      - name: folderName2
         value: ${{ parameters.folderName }}
 
     steps:
@@ -96,8 +95,19 @@ jobs:
           echo "solutionPathName=$(solutionPathName)"
           echo "projectPathName=$(projectPathName)"
           echo "exeName=$(exeName)"
-          echo "Directory of pipeline workspace:"
+          echo "projectPath2=$(projectPath2)"
+          echo "folderName2=$(folderName2)"
+          echo "solutionName2=$(solutionName2)"
+          echo "projectName2=$(projectName2)"
+          echo "solutionPathName2=$(solutionPathName2)"
+          echo "projectPathName2=$(projectPathName2)"
+          echo "exeName2=$(exeName2)"
+          echo "---------- Directory of pipeline workspace:"
           dir $(Pipeline.Workspace) /s
+          echo "---------- Directory of projectPath:"
+          dir $(projectPath) /s
+          echo "---------- Directory of projectPath2:"
+          dir $(projectPath2) /s
       displayName: 'Display Variables and Tree'
       continueOnError: true
 
@@ -111,8 +121,13 @@ jobs:
         echo "solutionPathName=$(solutionPathName)"
         echo "projectPathName=$(projectPathName)"
         echo "exeName=$(exeName)"
-        echo "Directory of pipeline workspace:"
-        dir $(Pipeline.Workspace) /s
+        echo "projectPath2=$(projectPath2)"
+        echo "folderName2=$(folderName2)"
+        echo "solutionName2=$(solutionName2)"
+        echo "projectName2=$(projectName2)"
+        echo "solutionPathName2=$(solutionPathName2)"
+        echo "projectPathName2=$(projectPathName2)"
+        echo "exeName2=$(exeName2)"
       displayName: 'Display Bash Variables and Tree'
       continueOnError: true
 
@@ -122,6 +137,15 @@ jobs:
         solution: $(solutionPathName)
         platform: $(buildPlatform)
         configuration: $(buildConfiguration)
+      continueOnError: true
+
+    - task: VSBuild@1
+      displayName: 'Build Program2'
+      inputs:
+        solution: 'src/Durable.Demo/Durable.Demo.sln'
+        platform: $(buildPlatform)
+        configuration: $(buildConfiguration)
+      continueOnError: true
 
     #- task: VSTest@2
     #  displayName: 'Test Program'
