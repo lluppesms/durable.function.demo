@@ -65,6 +65,7 @@ jobs:
         restoreSolution: $(projectPath)
         #restoreSolution: '$(solution)'
 
+    - task: CmdLine@2
       inputs:
         script: |
           echo "variableGroupName=$(variableGroupName)"
