@@ -62,13 +62,25 @@ jobs:
   
     - task: NuGetCommand@2
       inputs:
-        restoreSolution: '$(projectPath)'
+        restoreSolution: $(projectPath)
         #restoreSolution: '$(solution)'
+
+      inputs:
+        script: |
+          echo "variableGroupName=$(variableGroupName)"
+          echo "environmentName=$(environmentName)"
+          echo "projectPath=$(projectPath)"
+          echo "exeName=$(exeName)"
+          echo "folderName=$(folderName)"
+          echo "Directory of pipeline workspace:"
+          dir $(Pipeline.Workspace) /s
+      displayName: 'Display Variables and Tree'
+      continueOnError: true
 
     - task: VSBuild@1
       displayName: 'Build Program'
       inputs:
-        solution: '$(projectPath)'
+        solution: $(projectPath)
         #solution: '$(solution)'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
@@ -84,20 +96,12 @@ jobs:
       displayName: Create win-x64 package
       inputs:
         command: publish
-        projects: '$(projectPath)'
+        projects: $(projectPath)
         #projects: '$(solution)'
         packDirectory: 
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)/packages'
         zipAfterPublish: false
-
-    - task: CmdLine@2
-      displayName: 'Show Directory List'
-      inputs:
-        script: |
-          echo "Directory of pipeline workspace:"
-          tree $(Pipeline.Workspace)
-      continueOnError: true
 
     - task: PowerShell@2
       displayName: 'Sign win-x64 application'
@@ -126,7 +130,7 @@ jobs:
       displayName: Create Linux package
       inputs:
         command: publish
-        projects: '$(projectPath)'
+        projects: $(projectPath)
         #projects: '$(solution)'
         publishWebProjects: false
         arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
