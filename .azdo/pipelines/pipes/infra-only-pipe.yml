@@ -14,10 +14,10 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- stage: ScanApplication
-  displayName: Scan Application
-  jobs:
-  - ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
+- ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
+  - stage: ScanApplication
+    displayName: Scan Application
+    jobs:
     - template: templates/scan-code-template.yml
       parameters:
         environmentName: 'DEV'

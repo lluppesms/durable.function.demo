@@ -105,7 +105,6 @@ jobs:
         solution: $(solutionPathName)
         platform: $(buildPlatform)
         configuration: $(buildConfiguration)
-      continueOnError: true
 
     #- task: VSTest@2
     #  displayName: 'Test Program'
