@@ -49,7 +49,7 @@ param allowNetworkAccess string = 'Allow'
 var templateTag = { TemplateFile: '~keyVault.bicep' }
 var tags = union(commonTags, templateTag)
 
-var owerAccessPolicy = keyVaultOwnerUserId == '' ? [] : [
+var ownerAccessPolicy = keyVaultOwnerUserId == '' ? [] : [
   {
     objectId: keyVaultOwnerUserId
     tenantId: subscription().tenantId
@@ -74,9 +74,10 @@ var applicationUserPolicies = [for appUser in applicationUserObjectIds: {
   tenantId: subscription().tenantId
   permissions: {
     secrets: [ 'get' ]
+    keys: [ 'get', 'wrapKey', 'unwrapKey' ] // Azure SQL uses these permissions to access TDE key
   }
 }]
-var accessPolicies = union(owerAccessPolicy, adminAccessPolicies, applicationUserPolicies)
+var accessPolicies = union(ownerAccessPolicy, adminAccessPolicies, applicationUserPolicies)
 
 var kvIpRules = keyVaultOwnerIpAddress == '' ? [] : [
   {

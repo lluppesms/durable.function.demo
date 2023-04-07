@@ -14,7 +14,7 @@ trigger:
   - none
   # batch: true
   # branches:
-  #   include: 
+  #   include:
   #     - main
   # paths:
   #   include:
@@ -23,6 +23,7 @@ trigger:
   #     - '**/*.yml'
   #     - '**/*.yaml'
   #     - '**/*.bicep'
+  #     - '**/*.md'
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
