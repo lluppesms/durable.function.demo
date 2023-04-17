@@ -51,7 +51,8 @@ resource storageAccountResource 'Microsoft.Storage/storageAccounts@2019-06-01' =
 }
 
 resource blobServiceResource 'Microsoft.Storage/storageAccounts/blobServices@2019-06-01' = {
-    name: '${storageAccountResource.name}/default'
+    parent: storageAccountResource
+    name: 'default'
     properties: {
         cors: {
             corsRules: [
