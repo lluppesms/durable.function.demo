@@ -18,7 +18,9 @@ param functionStorageAccountName string = ''
 
 // --------------------------------------------------------------------------------
 var templateTag = { TemplateFile: '~functionapp.bicep' }
+var azdTag = { 'azd-service-name': 'function' }
 var tags = union(commonTags, templateTag)
+var functionTags = union(commonTags, templateTag, azdTag)
 
 // --------------------------------------------------------------------------------
 resource storageAccountResource 'Microsoft.Storage/storageAccounts@2019-06-01' existing = { name: functionStorageAccountName }
@@ -66,7 +68,7 @@ resource functionAppResource 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
   kind: functionKind
-  tags: tags
+  tags: functionTags
   identity: {
     type: 'SystemAssigned'
   }
