@@ -31,10 +31,10 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
@@ -57,7 +57,7 @@ jobs:
     #  run: dotnet test "${{ inputs.rootDirectory }}" --no-build
 
     - name: Save Publish Artifacts
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.artifactName }}
         path: ${{ inputs.rootDirectory }}/output
