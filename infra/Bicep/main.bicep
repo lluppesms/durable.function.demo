@@ -98,6 +98,17 @@ module keyVaultModule 'keyvault.bicep' = {
     applicationUserObjectIds: [ functionModule.outputs.principalId ]
   }
 }
+
+module keyVaultSecretList 'keyvaultlistsecretnames.bicep' = {
+  name: 'keyVault-Secret-List-Names${deploymentSuffix}'
+  dependsOn: [ keyVaultModule ]
+  params: {
+    keyVaultName: keyVaultModule.outputs.name
+    location: location
+    userManagedIdentityId: keyVaultModule.outputs.userManagedIdentityId
+  }
+}
+
 module keyVaultSecret1 'keyvaultsecret.bicep' = {
   name: 'keyVaultSecret1${deploymentSuffix}'
   dependsOn: [ keyVaultModule, functionModule ]
@@ -105,6 +116,7 @@ module keyVaultSecret1 'keyvaultsecret.bicep' = {
     keyVaultName: keyVaultModule.outputs.name
     secretName: 'TwilioAccountSid'
     secretValue: twilioAccountSid
+    existingSecretNames: keyVaultSecretList.outputs.secretNameList
   }
 }
 
@@ -115,6 +127,7 @@ module keyVaultSecret2 'keyvaultsecret.bicep' = {
     keyVaultName: keyVaultModule.outputs.name
     secretName: 'TwilioAuthToken'
     secretValue: twilioAuthToken
+    existingSecretNames: keyVaultSecretList.outputs.secretNameList
   }
 }
 
@@ -125,6 +138,7 @@ module keyVaultSecret3 'keyvaultsecret.bicep' = {
     keyVaultName: keyVaultModule.outputs.name
     secretName: 'TwilioPhoneNumber'
     secretValue: twilioPhoneNumber
+    existingSecretNames: keyVaultSecretList.outputs.secretNameList
   }
 }
 module keyVaultSecret4 'keyvaultsecretstorageconnection.bicep' = {
@@ -132,8 +146,9 @@ module keyVaultSecret4 'keyvaultsecretstorageconnection.bicep' = {
   dependsOn: [ keyVaultModule, dataStorageModule ]
   params: {
     keyVaultName: keyVaultModule.outputs.name
-    keyName: 'DataStorageConnectionAppSetting'
+    secretName: 'DataStorageConnectionAppSetting'
     storageAccountName: dataStorageModule.outputs.name
+    existingSecretNames: keyVaultSecretList.outputs.secretNameList
   }
 }
 module functionAppSettingsModule 'functionappsettings.bicep' = {
