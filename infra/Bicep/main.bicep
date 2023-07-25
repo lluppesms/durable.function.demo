@@ -57,7 +57,6 @@ module logAnalyticsWorkspaceModule 'loganalyticsworkspace.bicep' = {
   }
 }
 
-
 // --------------------------------------------------------------------------------
 module functionStorageModule 'storageaccount.bicep' = {
   name: 'functionstorage${deploymentSuffix}'
