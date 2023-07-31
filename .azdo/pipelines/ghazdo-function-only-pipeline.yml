@@ -1,0 +1,43 @@
+# ----------------------------------------------------------------------------------------------------
+# Pipeline to deploy a Function App
+# ----------------------------------------------------------------------------------------------------
+# Note: This pipeline needs a variable group "DurableDemo"
+#  See ../Docs/Create-Variable-Group.md for details
+# ----------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: windows-latest
+
+# ----------------------------------------------------------------------------------------------------
+trigger:
+  # since this repo has both AzDO and GHA pipelines, nothing is run automatically...
+  - none
+  # batch: true
+  # branches:
+  #   include:
+  #     - main
+  # paths:
+  #   include:
+  #     - FunctionApp
+  #   exclude: 
+  #     - '**/*.yml'
+  #     - '**/*.yaml'
+  #     - '**/*.bicep'
+  #     - '**/*.md'
+
+# ----------------------------------------------------------------------------------------------------
+parameters:
+  - name: runGHAzDOScan
+    displayName: Run GHAzDO Scan
+    type: boolean
+    default: true
+
+# ----------------------------------------------------------------------------------------------------
+# This approach to optionally deploy QA works but it's not DRY
+# ----------------------------------------------------------------------------------------------------
+stages:
+- template: pipes/function-build-only-pipe.yml
+  parameters:
+    variableGroupName: 'DurableDemo'
+    environments: ['DEV']
+    runGHAzDOScan: ${{ parameters.runGHAzDOScan }}

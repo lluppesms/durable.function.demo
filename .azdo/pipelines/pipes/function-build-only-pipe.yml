@@ -1,0 +1,29 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline Template to build and deploy Application Only
+# ------------------------------------------------------------------------------------------------------------------------
+parameters:
+- name: environments
+  type: object
+  default: ['DEV']
+- name: variableGroupName
+  default: 'myVariableGroupName'
+- name: runGHAzDOScan
+  default: 'true'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- stage: BuildApplication
+  displayName: Build Application
+  jobs:
+  - ${{ if eq(lower(parameters.runGHAzDOScan), 'true') }}:
+    - template: templates/scan-code-template.yml
+      parameters:
+        environmentName: 'DEV'
+        runDevSecOpsScan: 'false'
+        runPsRuleScan: 'false'
+        runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
+
+  - template: templates/build-function-template.yml
+    parameters:
+      variableGroupName: ${{ parameters.variableGroupName }}
+      environmentName: 'DEV'
