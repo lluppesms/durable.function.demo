@@ -20,8 +20,8 @@ parameters:
   default: 'false'
 - name: runPsRuleScan
   default: 'false'
-- name: runGHAzDOScan
-  default: 'false'
+# - name: runGHAzDOScan
+#   default: 'false'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
@@ -29,21 +29,21 @@ jobs:
   displayName: Initialize Code Scans
   environment: ${{ parameters.environmentName }}
 
-# ----------------------------------------------------------------------------------------------------
-- ${{ if eq(lower(parameters.runGHAzDOScan), 'true') }}:
-  - job: SecurityScanJob
-    displayName: MS DevSecOps Scan Job
-    steps:
-    - task: AdvancedSecurity-Codeql-Init@1
-      inputs:
-        languages: 'csharp'
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: 'restore'
-    - task: AdvancedSecurity-Dependency-Scanning@1
-    - task: AdvancedSecurity-Codeql-Autobuild@1
-    - task: AdvancedSecurity-Codeql-Analyze@1
-    - task: AdvancedSecurity-Publish@1 
+# # ----------------------------------------------------------------------------------------------------
+# - ${{ if eq(lower(parameters.runGHAzDOScan), 'true') }}:
+#   - job: SecurityScanJob
+#     displayName: GHAzDO Scan Job
+#     steps:
+#     - task: AdvancedSecurity-Codeql-Init@1
+#       inputs:
+#         languages: 'csharp'
+#     - task: DotNetCoreCLI@2
+#       inputs:
+#         command: 'restore'
+#     - task: AdvancedSecurity-Dependency-Scanning@1
+#     - task: AdvancedSecurity-Codeql-Autobuild@1
+#     - task: AdvancedSecurity-Codeql-Analyze@1
+#     - task: AdvancedSecurity-Publish@1 
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ if eq(lower(parameters.runDevSecOpsScan), 'true') }}:
