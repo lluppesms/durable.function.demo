@@ -73,7 +73,7 @@ jobs:
     - name: Deploy Azure Resources
       uses: azure/arm-deploy@v1
       with:
-        scope: resource-group
+        scope: resourcegroup
         region: ${{ vars.AZURE_LOCATION }}
         resourceGroupName: ${{ env.generatedResourceGroupName }}
         template: infra/Bicep/main.bicep
