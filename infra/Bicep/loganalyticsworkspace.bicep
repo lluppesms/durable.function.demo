@@ -18,7 +18,7 @@ resource logWorkspaceResource 'Microsoft.OperationalInsights/workspaces@2021-06-
     sku: {
       name: 'PerGB2018'
     }
-    retentionInDays: 7
+    retentionInDays: 30
     features: {
       searchVersion: 1
     }
