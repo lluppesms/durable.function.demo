@@ -24,7 +24,7 @@ jobs:
 
     env:
       artifactName: functionapp
-      generatedAppEnvName: ${{ secrets.APP_NAME }}-${{ inputs.envCode }}
+      generatedAppEnvName: ${{ vars.APP_NAME }}-${{ inputs.envCode }}
 
     steps:
     - name: Download build artifacts

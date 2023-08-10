@@ -8,9 +8,44 @@ name: deploy.infra.and.function
 on: 
   workflow_dispatch:
     inputs:
+      deployToDemo:
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - true
+          - false
+      deployToDev:
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+      deployToQA:
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+      deployToProd:
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+      securityScan:
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
       logLevel:
         description: 'Log level'     
-        required: true
+        required: false
         default: 'warning' 
         type: choice
         options:
@@ -30,33 +65,48 @@ jobs:
 
 # ------------------------------------------------------------------------------------------------------------------------
   infra-demo:
+    if: inputs.deployToDemo == 'true'
     name: Create Demo Infra
     needs: build-app
     uses: ./.github/workflows/template-create-infra.yml
     secrets: inherit
     with:
       envCode: 'demo'
-      location: 'eastus'
-      storageSku: 'Standard_LRS'
-      functionAppSku: 'Y1'
-      functionAppSkuFamily: 'Y'
-      functionAppSkuTier: 'Dynamic'
+      securityScan: ${{ inputs.securityScan }}
 
-  # infra-qa:
-  #   name: Create QA Infra
-  #   needs: infra-demo
-  #   uses: ./.github/workflows/template-create-infra.yml
-  #   secrets: inherit
-  #   with:
-  #     envCode: 'qa'
-  #     location: 'eastus'
-  #     storageSku: 'Standard_LRS'
-  #     functionAppSku: 'Y1'
-  #     functionAppSkuFamily: 'Y'
-  #     functionAppSkuTier: 'Dynamic'
+  infra-dev:
+    if: inputs.deployToDev == 'true'
+    name: Create Dev Infra
+    needs: build-app
+    uses: ./.github/workflows/template-create-infra.yml
+    secrets: inherit
+    with:
+      envCode: 'dev'
+      securityScan: ${{ inputs.securityScan }}
 
+  infra-qa:
+    if: inputs.deployToQA == 'true'
+    name: Create QA Infra
+    needs: build-app
+    uses: ./.github/workflows/template-create-infra.yml
+    secrets: inherit
+    with:
+      envCode: 'qa'
+      securityScan: ${{ inputs.securityScan }}
+
+  infra-prod:
+    if: inputs.deployToProd == 'true'
+    name: Create Prod Infra
+    needs: build-app
+    uses: ./.github/workflows/template-create-infra.yml
+    secrets: inherit
+    with:
+      envCode: 'prod'
+      securityScan: ${{ inputs.securityScan }}
+    
 # ------------------------------------------------------------------------------------------------------------------------
   deploy-app-demo:
+    if: inputs.deployToDemo == 'true'
     name: Deploy Demo App
     needs: infra-demo
     uses: ./.github/workflows/template-function-app-deploy.yml
@@ -64,10 +114,30 @@ jobs:
     with:
       envCode: 'demo'
 
-  # deploy-app-qa:
-  #   name: Deploy QA App
-  #   needs: deploy-app-demo
-  #   uses: ./.github/workflows/template-function-app-deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     envCode: 'qa'
+  deploy-app-dev:
+    if: inputs.deployToDev == 'true'
+    name: Deploy Dev App
+    needs: infra-dev
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    secrets: inherit
+    with:
+      envCode: 'dev'
+
+  deploy-app-qa:
+    if: inputs.deployToQA == 'true'
+    name: Deploy QA App
+    needs: infra-qa
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    secrets: inherit
+    with:
+      envCode: 'qa'
+
+  deploy-app-prod:
+    if: inputs.deployToProd == 'true'
+    name: Deploy Prod App
+    needs: infra-prod
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    secrets: inherit
+    with:
+      envCode: 'prod'
+        

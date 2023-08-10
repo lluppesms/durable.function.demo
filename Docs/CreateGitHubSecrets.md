@@ -31,10 +31,11 @@ These secrets are used by the Bicep templates to configure the resource names th
 Make sure the App_Name variable is unique to your deploy. It will be used as the basis for the function name and for all the other Azure resources, which must be globally unique.
 To create these additional secrets, customize and run this command:
 
-Required Values:
+Required Secret Values:
 
 ``` bash
-gh secret set APP_NAME -b '<yourInitials>-durableg'
+gh auth login
+
 gh secret set AZURE_SUBSCRIPTION_ID -b '<yourAzureSubscriptionId>'
 gh secret set KEYVAULT_OWNER_USERID -b '<owner1SID>'
 ```
@@ -45,6 +46,17 @@ Optional Values: (only needed if Twilio notification functions are expected to w
 gh secret set TWILIOACCOUNTSID -b '<twilioAccountSid>'
 gh secret set TWILIOAUTHTOKEN -b '<twilioAuthToken>'
 gh secret set TWILIOPHONENUMBER -b '<twilioPhoneNumber>'
+```
+
+Required Repository Variables:
+
+``` bash
+gh variable set APP_NAME -b '<yourInitials>-durableg'
+gh variable set AZURE_LOCATION -b 'eastus2'
+gh variable set STORAGE_SKU -b 'Standard_LRS'
+gh variable set FUNCTION_APP_SKU -b 'Y1'
+gh variable set FUNCTION_APP_SKU_FAMILY -b 'Y'
+gh variable set FUNCTION_APP_SKU_TIER -b 'Dynamic'
 ```
 
 <!-- 
