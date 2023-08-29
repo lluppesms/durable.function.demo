@@ -2,8 +2,6 @@
 // This BICEP file will create a KeyVault
 // FYI: To purge a KV with soft delete enabled: > az keyvault purge --name kvName
 // --------------------------------------------------------------------------------
-// Remaining Cloud Defender Issue: Medium - Private endpoint should be configured for Key Vault
-// --------------------------------------------------------------------------------
 param keyVaultName string = 'mykeyvaultname'
 param location string = resourceGroup().location
 param commonTags object = {}
@@ -38,8 +36,15 @@ param publicNetworkAccess string = 'Enabled'
 @allowed(['Allow','Deny'])
 param allowNetworkAccess string = 'Allow'
 
+@description('Create a user assigned identity that can be used to verify and update secrets in future steps')
 param createUserAssignedIdentity bool = true
+@description('Override the default user assigned identity user name if you need to')
 param userAssignedIdentityName string = '${keyVaultName}-cicd'
+
+@description('Create a user assigned identity that DAPR can use to read secrets')
+param createDaprIdentity bool = false
+@description('Override the default DAPR identity user name if you need to')
+param daprIdentityName string = '${keyVaultName}-dapr'
 
 @description('The workspace to store audit logs.')
 @metadata({
@@ -102,23 +107,16 @@ resource keyVaultResource 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
       name: skuName
     }
     tenantId: subTenantId
-
-    // Use Access Policies model
     enableRbacAuthorization: useRBAC
-    // add function app and web app identities in the access policies so they can read the secrets
     accessPolicies: accessPolicies
-
     enabledForDeployment: enabledForDeployment
     enabledForDiskEncryption: enabledForDiskEncryption
     enabledForTemplateDeployment: enabledForTemplateDeployment
     enableSoftDelete: enableSoftDelete
-
     enablePurgeProtection: enablePurgeProtection // Not allowing to purge key vault or its objects after deletion
     createMode: 'default'                        // Creating or updating the key vault (not recovering)
     softDeleteRetentionInDays: softDeleteRetentionInDays
-
     publicNetworkAccess: publicNetworkAccess   // Allow access from all networks
-
     networkAcls: {
       defaultAction: allowNetworkAccess
       bypass: 'AzureServices'
@@ -133,19 +131,35 @@ resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@
   name: userAssignedIdentityName
   location: location
 }
-resource userAssignedIdentityKeyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = if (createUserAssignedIdentity) {
+var userAssignedIdentityPolicies = (!createUserAssignedIdentity) ? [] : [{
+  tenantId: userAssignedIdentity.properties.tenantId
+  objectId: userAssignedIdentity.properties.principalId
+  permissions: {
+    secrets: ['get','list','set']
+  }
+}]
+
+// this creates an identity for DAPR that can be used to get secrets
+resource daprIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = if (createDaprIdentity) {
+  name: daprIdentityName
+  location: location
+}
+var daprIdentityPolicies = (!createDaprIdentity) ? [] : [{
+  tenantId: daprIdentity.properties.tenantId
+  objectId: daprIdentity.properties.principalId
+  permissions: {
+    secrets: ['get','list']
+  }
+}]
+
+// you can only do one add in a Bicep file, so we union the policies together
+var userIdentityPolicies = union(userAssignedIdentityPolicies, daprIdentityPolicies)
+
+resource userAssignedIdentityKeyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = if (createUserAssignedIdentity || createDaprIdentity) {
   name: 'add'
   parent: keyVaultResource
   properties: {
-    accessPolicies: [
-      {
-        permissions: {
-          secrets: ['get','list','set']
-        }
-        tenantId: userAssignedIdentity.properties.tenantId
-        objectId: userAssignedIdentity.properties.principalId
-      }
-    ]
+    accessPolicies: userIdentityPolicies
   }
 }
 
