@@ -17,7 +17,7 @@ content-type: text/plain
 ### Look in the logs for the SMS code that was sent to a phone, and put that in the body text below the post
 ### then click on Send Request
 
-POST http://localhost:7071/runtime/webhooks/durabletask/instances/48b843a8f0bd4390be55b3261c4a2796/raiseEvent/SmsChallengeResponse?taskHub=TestHubName&connection=Storage&code=
+POST http://localhost:7071/runtime/webhooks/durabletask/instances/xxx/raiseEvent/SmsChallengeResponse?...
 Content-type: application/json
 
 7853

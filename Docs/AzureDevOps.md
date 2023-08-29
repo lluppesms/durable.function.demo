@@ -70,20 +70,4 @@ This example sends a text message so you will want to have a Twilio account set 
 
 ---
 
-## 6. Azurite Issues?
-
-For local development of Azure Functions, it is preferable to use local storage with Azurite.  However, there is a bug with Azurite 3.17, so currently if you have problems with it, the best way to fix this is to install an older version of Azureite via NPM:
->
-> ``` bash
-> npm uninstall -g azurite
-> npm install -g azurite@3.16.0
-> ```
-
-To run Azureite, you may have to open a command shell in Administrator Mode and run it like this:
-
-> ``` bash
-> > cd C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\Extensions\Microsoft\Azure Storage Emulator
-> > azurite.exe
-> ```
-
 [Reference: Using Azurite Local Storage](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite?toc=%2Fazure%2Fstorage%2Fblobs%2Ftoc.json&tabs=visual-studio)
