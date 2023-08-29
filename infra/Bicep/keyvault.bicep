@@ -158,10 +158,11 @@ resource keyVaultAuditLogging 'Microsoft.Insights/diagnosticSettings@2021-05-01-
       {
         category: 'AuditEvent'
         enabled: true
-        retentionPolicy: {
-          days: 180
-          enabled: true 
-        }
+        // Note: Causes error: Diagnostic settings does not support retention for new diagnostic settings.
+        // retentionPolicy: {
+        //   days: 180
+        //   enabled: true 
+        // }
       }
     ]
   }
@@ -176,10 +177,11 @@ resource keyVaultMetricLogging 'Microsoft.Insights/diagnosticSettings@2021-05-01
       {
         category: 'AllMetrics'
         enabled: true
-        retentionPolicy: {
-          days: 30
-          enabled: true 
-        }
+        // Note: Causes error: Diagnostic settings does not support retention for new diagnostic settings.
+        // retentionPolicy: {
+        //   days: 30
+        //   enabled: true 
+        // }
       }
     ]
   }
