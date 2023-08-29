@@ -18,7 +18,7 @@ content-type: text/plain
 ### Look in the logs for the SMS code that was sent to your phone
 ### Replace that in the body text below and click on Send Request
 
-POST https://lll-durabledemo-dev.azurewebsites.net/runtime/webhooks/durabletask/instances/e7180777abe749e4ab5fc84b63cfb6c6/raiseEvent/SmsChallengeResponse?taskHub=llldurabledemodev&connection=Storage&code=JvCVr5UfDLpXg7FxNWpth93g0xNPHzEHUrEDpYuSWHEsAzFuCKtbPA==
+POST https://lll-durabledemo-dev.azurewebsites.net/runtime/webhooks/durabletask/instances/...
 Content-type: application/json
 
 9497

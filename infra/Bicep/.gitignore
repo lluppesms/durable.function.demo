@@ -1,0 +1,4 @@
+*.json
+!bicepconfig.json
+*.bicepTest
+test.bicep

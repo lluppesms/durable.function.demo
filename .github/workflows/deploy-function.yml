@@ -8,6 +8,34 @@ name: deploy.functionapp
 on:
   workflow_dispatch:
     inputs:
+      deployToDemo:
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - true
+          - false
+      deployToDev:
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+      deployToQA:
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+      deployToProd:
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
       logLevel:
         description: 'Log level'     
         required: true
@@ -29,18 +57,38 @@ jobs:
       rootDirectory: 'src/Durable.Demo'
 
 # ------------------------------------------------------------------------------------------------------------------------
-  deploy-demo:
-    name: Deploy Function App
+  deploy-app-demo:
+    if: inputs.deployToDemo == 'true'
+    name: Deploy Demo App
     needs: build-app
     uses: ./.github/workflows/template-function-app-deploy.yml
     secrets: inherit
     with:
       envCode: 'demo'
 
-  # deploy-qa:
-  #   name: Deploy Function App
-  #   needs: deploy-demo
-  #   uses: ./.github/workflows/template-function-app-deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     envCode: 'qa'
+  deploy-app-dev:
+    if: inputs.deployToDev == 'true'
+    name: Deploy Dev App
+    needs: build-app
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    secrets: inherit
+    with:
+      envCode: 'dev'
+
+  deploy-app-qa:
+    if: inputs.deployToQA == 'true'
+    name: Deploy QA App
+    needs: build-app
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    secrets: inherit
+    with:
+      envCode: 'qa'
+
+  deploy-app-prod:
+    if: inputs.deployToProd == 'true'
+    name: Deploy Prod App
+    needs: build-app
+    uses: ./.github/workflows/template-function-app-deploy.yml
+    secrets: inherit
+    with:
+      envCode: 'prod'
