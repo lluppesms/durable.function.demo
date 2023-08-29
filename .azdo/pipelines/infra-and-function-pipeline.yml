@@ -7,6 +7,8 @@
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
   vmImage: ubuntu-latest
+variables:
+  - group: DurableDemo
 
 # ------------------------------------------------------------------------------------------------------------------------
 trigger:

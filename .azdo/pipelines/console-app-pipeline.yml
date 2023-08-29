@@ -7,6 +7,8 @@
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
   vmImage: windows-latest
+variables:
+  - group: DurableDemo
 
 # ----------------------------------------------------------------------------------------------------
 trigger:
