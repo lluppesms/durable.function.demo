@@ -4,7 +4,7 @@
 namespace Durable.Demo.Interaction;
 public static class Interaction_Orchestration
 {
-    private static string DataSource = Constants.DataSource.Interaction.Orchestration;
+    private static string LogDataSource = Constants.DataSource.Interaction.Orchestration;
 
     [FunctionName("Interaction_Orchestration")]
     public static async Task<bool> RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger log)
@@ -12,7 +12,7 @@ public static class Interaction_Orchestration
         try
         {
             var phoneNumber = context.GetInput<string>();
-            log.LogInformation($"{DataSource} was activated with {phoneNumber}!");
+            log.LogInformation($"{LogDataSource} was activated with {phoneNumber}!");
 
             if (string.IsNullOrEmpty(phoneNumber))
             {
@@ -56,12 +56,12 @@ public static class Interaction_Orchestration
             }
             if (authorized)
             {
-                log.LogInformation($"{DataSource} Submitting work request for {phoneNumber}");
+                log.LogInformation($"{LogDataSource} Submitting work request for {phoneNumber}");
                 await context.CallActivityAsync<string>("Interaction_DoWork", phoneNumber);
             }
             else
             {
-                log.LogInformation($"{DataSource} SMS Verification failed for {phoneNumber}!");
+                log.LogInformation($"{LogDataSource} SMS Verification failed for {phoneNumber}!");
             }
             return authorized;
         }

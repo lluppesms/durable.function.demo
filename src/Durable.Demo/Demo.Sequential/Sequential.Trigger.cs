@@ -3,8 +3,10 @@ namespace Durable.Demo.Sequential;
 public static class Sequential_Trigger
 {
     private static string DataSource = Constants.DataSource.Sequential.Trigger;
-    
-    [FunctionName("Sequential_Trigger")]
+
+	[OpenApiOperation(operationId: "Sequential_Trigger", tags: new[] { "name" }, Summary = "Start Sequential Operation", Description = "Start Sequential Operation", Visibility = OpenApiVisibilityType.Important)]
+	[OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Summary = "The response", Description = "This returns the response")]
+	[FunctionName("Sequential_Trigger")]
     public static async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
         [DurableClient] IDurableOrchestrationClient starter,

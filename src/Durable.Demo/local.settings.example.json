@@ -1,0 +1,25 @@
+
+/* Copy these values to your local.settings.json and adjust the Redis Key Vaults. The pipeline will populate the Azure Deployment Configuration with these values. */
+
+{
+  "IsEncrypted": false,
+  "Values": {
+    "LocalAzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+
+    /* The pipeline will populate the Azure Deployment Configuration with these values. */
+    /* Adjust these values with keys from your Azure deployment */
+    "DataStorageConnectionAppSetting": "DefaultEndpointsProtocol=https;AccountName=xxxdurabledevstr...",
+
+    "TwilioAccountSid": "...",
+    "TwilioAuthToken": "...",
+    "TwilioPhoneNumber": "...",
+
+    /* You may want to hide the Swagger documents in production... See https://github.com/Azure/azure-functions-openapi-extension/blob/main/docs/openapi.md */
+    "OpenApi__HideSwaggerUI": "false",
+    "OpenApi__HideDocument": "false",
+    "OpenApi__DocTitle": "Durable Functions Demo APIs",
+    "OpenApi__DocDescription": "This repo is an example of how to use Azure Durable Functions"
+  }
+}

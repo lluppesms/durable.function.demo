@@ -1,6 +1,3 @@
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.DataContracts;
-
 namespace Durable.Demo;
 
 public static class MyLogger
@@ -31,11 +28,28 @@ public static class MyLogger
     public static void InitializeLogger(ILogger iLog)
     {
         if (logger == null)
-        {            logger = iLog;
+        {
+            logger = iLog;
             AppInsightsInstrumentationKey = Common.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY");
             CreateAppInsightsClient();
         }
     }
+
+	/// <summary>
+	/// Initialize Logger
+	/// </summary>
+	public static void Initialize_And_Log(ILogger iLog, string msg, string source = "")
+	{
+		if (logger == null)
+		{
+			logger = iLog;
+			AppInsightsInstrumentationKey = Common.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY");
+			CreateAppInsightsClient();
+		}
+		logger.LogInformation(msg);
+		//Console.WriteLine(msg);
+		AppInsightsTrace(msg, SeverityLevel.Information, source, string.Empty);
+	}
 
     /// <summary>
     /// Log Info message
@@ -53,6 +67,60 @@ public static class MyLogger
     }
 
     /// <summary>
+    /// Log Object Values
+    /// </summary>
+    public static dynamic LogObject(dynamic obj, string source, string serialNumber = "", StringBuilder sb = null)
+    {
+        try
+        {
+            string msg = JsonConvert.SerializeObject(obj);
+            if (logger != null)
+            {
+                logger.LogInformation(msg);
+            }
+            if (sb != null)
+            {
+                sb.Append($"{msg};\n");
+            }
+            //Console.WriteLine(msg);
+            AppInsightsTrace(msg, SeverityLevel.Information, source, serialNumber);
+            return obj;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error writing object to log: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Log ResultMessage Values
+    /// </summary>
+    public static ResultMessage LogResultMessage(ResultMessage obj, string source, string serialNumber = "", StringBuilder sb = null)
+    {
+        try
+        {
+            string msg = JsonConvert.SerializeObject(obj);
+            if (logger != null)
+            {
+                logger.LogInformation(msg);
+            }
+            if (sb != null)
+            {
+                sb.Append($"{msg};\n");
+            }
+            //Console.WriteLine(msg);
+            AppInsightsTrace(msg, SeverityLevel.Information, source, serialNumber);
+            return obj;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error writing object to log: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Log Info message
     /// </summary>
     public static void LogInfo(string msg, string source, string serialNumber = "", StringBuilder sb = null)
@@ -65,7 +133,7 @@ public static class MyLogger
         {
             sb.Append($"{msg};\n");
         }
-        Console.WriteLine(msg);
+        //Console.WriteLine(msg);
         AppInsightsTrace(msg, SeverityLevel.Information, source, serialNumber);
     }
 
@@ -82,7 +150,7 @@ public static class MyLogger
         {
             sb.Append($"{msg};\n");
         }
-        Console.WriteLine(msg);
+        //Console.WriteLine(msg);
         AppInsightsTrace(msg, SeverityLevel.Warning, source, serialNumber);
     }
 
@@ -99,8 +167,97 @@ public static class MyLogger
         {
             sb.Append($"{msg};\n");
         }
-        Console.WriteLine(msg);
+        //Console.WriteLine(msg);
         AppInsightsTrace(msg, SeverityLevel.Error, source, serialNumber);
+    }
+
+    /// <summary>
+    /// Log Exception message
+    /// </summary>
+    public static string LogException(string msg, Exception ex, string source = "", string serialNumber = "", StringBuilder sb = null)
+    {
+        var fullMessage = $"{msg} {GetExceptionMessage(ex)}";
+        if (logger != null)
+        {
+            logger.LogError(fullMessage);
+        }
+        if (sb != null)
+        {
+            sb.Append($"{fullMessage};\n");
+        }
+        //Console.WriteLine(fullMessage);
+        AppInsightsTrace(fullMessage, SeverityLevel.Error, source, serialNumber);
+        return fullMessage;
+    }
+
+    /// <summary>
+    /// Log Exception message - return an ResultMessage object
+    /// </summary>
+    public static ResultMessage LogExceptionMessage(string methodName, Exception ex, string source = "", string serialNumber = "", StringBuilder sb = null)
+    {
+        var fullMessage = $"Error in {methodName}: {GetExceptionMessage(ex)}";
+        if (logger != null)
+        {
+            logger.LogError(fullMessage);
+        }
+        if (sb != null)
+        {
+            sb.Append($"{fullMessage};\n");
+        }
+        //Console.WriteLine(fullMessage);
+        AppInsightsTrace(fullMessage, SeverityLevel.Error, source, serialNumber);
+        return new ResultMessage(false, fullMessage);
+    }
+
+    /// <summary>
+    /// Gets inner exception message.
+    /// </summary>
+    /// <param name="ex">The Exception.</param>
+    /// <returns>The Full Message.</returns>
+    public static string GetExceptionMessage(Exception ex)
+    {
+        var message = string.Empty;
+        if (ex == null)
+        {
+            return message;
+        }
+
+        if (ex.Message != null)
+        {
+            message += ex.Message;
+        }
+
+        if (ex.InnerException == null)
+        {
+            return message;
+        }
+
+        if (ex.InnerException.Message != null)
+        {
+            message += " " + ex.InnerException.Message;
+        }
+
+        if (ex.InnerException.InnerException == null)
+        {
+            return message;
+        }
+
+        if (ex.InnerException.InnerException.Message != null)
+        {
+            message += " " + ex.InnerException.InnerException.Message;
+        }
+
+        if (ex.InnerException.InnerException.InnerException == null)
+        {
+            return message;
+        }
+
+        if (ex.InnerException.InnerException.InnerException.Message != null)
+        {
+            message += " " + ex.InnerException.InnerException.InnerException.Message;
+        }
+
+        return message;
     }
 
     #region App Insights Functions

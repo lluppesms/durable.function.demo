@@ -165,12 +165,15 @@ module keyVaultSecret4 'keyvaultsecretstorageconnection.bicep' = {
 }
 module functionAppSettingsModule 'functionappsettings.bicep' = {
   name: 'functionAppSettings${deploymentSuffix}'
-  // dependsOn: [  keyVaultSecrets ]
   params: {
     functionAppName: functionModule.outputs.name
     functionStorageAccountName: functionStorageModule.outputs.name
     functionInsightsKey: functionModule.outputs.insightsKey
     customAppSettings: {
+      OpenApi__HideSwaggerUI: 'false'
+      OpenApi__HideDocument: 'false'
+      OpenApi__DocTitle: 'Durable Functions Demo APIs'
+      OpenApi__DocDescription: 'This repo is an example of how to use Durable Azure Functions'
       TwilioAccountSid: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=TwilioAccountSid)'
       TwilioAuthToken: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=TwilioAuthToken)'
       TwilioPhoneNumber: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.name};SecretName=TwilioPhoneNumber)'
