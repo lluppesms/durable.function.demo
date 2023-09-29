@@ -1,0 +1,22 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# GHA Workflow to do a security scan only
+# ------------------------------------------------------------------------------------------------------------------------
+name: scan.code
+on: 
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: false
+        default: 'warning' 
+        type: choice
+        options:
+          - info
+          - warning
+          - debug 
+  
+# ------------------------------------------------------------------------------------------------------------------------
+jobs:
+  scan-code:
+    name: Scan Source Code
+    uses: ./.github/workflows/template-security-scan.yml
