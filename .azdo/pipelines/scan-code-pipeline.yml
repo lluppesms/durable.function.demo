@@ -1,0 +1,45 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline to Run Scan Utilities
+# ------------------------------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: windows-latest
+
+# ----------------------------------------------------------------------------------------------------
+trigger:
+  - none
+
+# ----------------------------------------------------------------------------------------------------
+parameters:
+  - name: runDevSecOpsScan
+    displayName: Run MS DevSecOps Scan
+    type: string
+    values:
+      - None
+      - Scan_Everything
+      - Scan_Code_All_Folders
+      - Scan_Infra_All_Folders
+      - Scan_Code_One_Folder
+      - Scan_Infra_One_Folder
+      - Scan_Infra_Folder_For_Code
+      - Scan_Code_Folder_For_Infra
+      - All_Of_The_Above
+    default: None
+  - name: runPsRuleScan
+    displayName: Run PSRule Bicep Scan
+    type: boolean
+    default: false
+  - name: runGHAzDOScan
+    displayName: Run GHAS Scan
+    type: string
+    default: false
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- template: pipes/templates/scan-code-template.yml
+  parameters:
+    runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
+    runPsRuleScan: ${{ parameters.runPsRuleScan }}
+    runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
+    workingDirectoryCode: 'src/Durable.Demo'
+    workingDirectoryInfra: '/infra/bicep'
