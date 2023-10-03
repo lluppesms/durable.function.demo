@@ -59,7 +59,7 @@ jobs:
       #uses: microsoft/security-devops-action@preview
       id: msdo2
       with:
-        tools: antimalware, eslint, binskim
+        tools: antimalware,eslint,binskim
 
     - name: Run Full Infra Scan
       if: inputs.scanToRun == 'Scan_Infra_All_Folders' || inputs.scanToRun == 'All_Of_The_Above'
@@ -68,7 +68,7 @@ jobs:
       #uses: microsoft/security-devops-action@preview
       id: msdo3
       with:
-        tools: templateanalyzer,terrascan
+        tools: templateanalyzer,terrascan,trivy
 
       # this works to just scan source code directory...!
     - name: Run One Directory Code Scan
@@ -81,7 +81,7 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryCode }}
         run_workingdirectory: ${{ inputs.workingDirectoryCode }}
       with:
-        tools: antimalware, eslint, binskim
+        tools: antimalware,eslint,binskim
 
     # this works to just scan infra code directory...!
     - name: Run One Directory Infra Scan
@@ -94,7 +94,7 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
         run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
       with:
-        tools: templateanalyzer,terrascan
+        tools: templateanalyzer,terrascan,trivy
 
     # this should FAIL (but doesn't...) to find infra code and not throw any errors...!
     - name: Run Code Scan on Infra Folder
@@ -107,7 +107,7 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
         run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
       with:
-        tools: antimalware, eslint, binskim
+        tools: antimalware,eslint,binskim
 
     # this should FAIL (but doesn't...) to find infra code and not throw any errors...!
     - name: Run Infra Scan on Code Folder
@@ -120,16 +120,97 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryCode }}
         run_workingdirectory: ${{ inputs.workingDirectoryCode }}
       with:
-        tools: templateanalyzer,terrascan
+        tools: templateanalyzer,terrascan,trivy
 
+# ------------------------------------------------------------------------------------------------------------------------
     - name: Upload MS SecDevOps alerts to Security tab
+      if: inputs.scanToRun == 'Scan_Everything'
       continue-on-error: true
       uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: ${{ steps.msdo.outputs.sarifFile }}
-
     - name: Upload MS SecDevOps alerts to Workflow Artifacts
+      if: inputs.scanToRun == 'Scan_Everything'
       uses: actions/upload-artifact@v3
       with:  
         name: alerts
         path: ${{ steps.msdo.outputs.sarifFile }}
+# ------------------------------------------------------------------------------------------------------------------------
+    - name: Upload MS SecDevOps alerts to Security tab
+      if: inputs.scanToRun == 'Scan_Code_All_Folders'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo2.outputs.sarifFile }}
+    - name: Upload MS SecDevOps alerts to Workflow Artifacts
+      if: inputs.scanToRun == 'Scan_Code_All_Folders'
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo2.outputs.sarifFile }}
+# ------------------------------------------------------------------------------------------------------------------------
+    - name: Upload MS SecDevOps alerts to Security tab
+      if: inputs.scanToRun == 'Scan_Infra_All_Folders'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo3.outputs.sarifFile }}
+    - name: Upload MS SecDevOps alerts to Workflow Artifacts
+      if: inputs.scanToRun == 'Scan_Infra_All_Folders'
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo3.outputs.sarifFile }}
+# ------------------------------------------------------------------------------------------------------------------------
+    - name: Upload MS SecDevOps alerts to Security tab
+      if: inputs.scanToRun == 'Scan_Code_One_Folder'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo4.outputs.sarifFile }}
+    - name: Upload MS SecDevOps alerts to Workflow Artifacts
+      if: inputs.scanToRun == 'Scan_Code_One_Folder'
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo4.outputs.sarifFile }}
+# ------------------------------------------------------------------------------------------------------------------------
+    - name: Upload MS SecDevOps alerts to Security tab
+      if: inputs.scanToRun == 'Scan_Infra_One_Folder'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo5.outputs.sarifFile }}
+    - name: Upload MS SecDevOps alerts to Workflow Artifacts
+      if: inputs.scanToRun == 'Scan_Infra_One_Folder'
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo5.outputs.sarifFile }}
+# ------------------------------------------------------------------------------------------------------------------------
+    - name: Upload MS SecDevOps alerts to Security tab
+      if: inputs.scanToRun == 'Scan_Infra_Folder_For_Code'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo6.outputs.sarifFile }}
+    - name: Upload MS SecDevOps alerts to Workflow Artifacts
+      if: inputs.scanToRun == 'Scan_Infra_Folder_For_Code'
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo6.outputs.sarifFile }}
+# ------------------------------------------------------------------------------------------------------------------------
+    - name: Upload MS SecDevOps alerts to Security tab
+      if: inputs.scanToRun == 'Scan_Code_Folder_For_Infra'
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo7.outputs.sarifFile }}
+    - name: Upload MS SecDevOps alerts to Workflow Artifacts
+      if: inputs.scanToRun == 'Scan_Code_Folder_For_Infra'
+      uses: actions/upload-artifact@v3
+      with:  
+        name: alerts
+        path: ${{ steps.msdo7.outputs.sarifFile }}
+                                          

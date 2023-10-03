@@ -32,8 +32,11 @@ parameters:
     default: false
   - name: runDevSecOpsScan
     displayName: Run MS DevSecOps Scan
-    type: boolean
-    default: false
+    type: string
+    values:
+      - None
+      - Scan_Infra_All_Folders
+    default: None
   - name: runPsRuleScan
     displayName: Run PSRule Bicep Scan
     type: boolean

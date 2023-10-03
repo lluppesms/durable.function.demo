@@ -15,9 +15,25 @@ on:
       rootDirectory:
         required: true
         type: string
-
+      securityScan:
+        required: false
+        type: string
+        default: 'false'
+      continueOnScanError:
+        required: false
+        default: true
+        type: boolean
+    
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
+  security-scan:
+    name: Scan Source Code
+    if: inputs.securityScan == 'true'
+    uses: ./.github/workflows/template-security-scan.yml
+    with:
+      scanToRun: 'Scan_Code_All_Folders'
+      continueOnScanError: ${{ inputs.continueOnScanError }}
+
   build:
     name: Build
     runs-on: ubuntu-latest

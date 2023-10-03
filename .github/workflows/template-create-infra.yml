@@ -16,13 +16,20 @@ on:
         required: false
         type: string
         default: 'false'
+      continueOnScanError:
+        required: false
+        default: true
+        type: boolean
   
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
-  scan-code:
-    name: Scan Source Code
+  security-scan:
+    name: Scan Infra Code
     if: inputs.securityScan == 'true'
     uses: ./.github/workflows/template-security-scan.yml
+    with:
+      scanToRun: 'Scan_Infra_All_Folders'
+      continueOnScanError: ${{ inputs.continueOnScanError }}
 
   deploy:
     name: Create Infra
