@@ -36,7 +36,7 @@ parameters:
     values:
       - None
       - Scan_Infra_All_Folders
-    default: None
+    default: Scan_Infra_All_Folders
   - name: runPsRuleScan
     displayName: Run PSRule Bicep Scan
     type: boolean

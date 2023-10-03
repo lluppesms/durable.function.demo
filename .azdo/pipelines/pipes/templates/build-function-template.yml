@@ -6,6 +6,10 @@ parameters:
   default:  'myVariableGroup'
 - name: environmentName
   default:  'DEV'
+- name: workingDirectoryCode
+  default: '/src/myProject'
+- name: workingDirectoryInfra
+  default: '/infra/bicep'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
@@ -24,14 +28,15 @@ jobs:
       echo "Build.ArtifactStagingDirectory=$(Build.ArtifactStagingDirectory)"
       echo "System.DefaultWorkingDirectory=$(System.DefaultWorkingDirectory)"
       echo "Build.BuildId=$(Build.BuildId)"
-      echo "appPrefix=$(appPrefix)"
+      echo "appName=$(appName)"
+      echo "parameters.workingDirectoryCode=${{ parameters.workingDirectoryCode }}"
     continueOnError: true
     displayName: 'Display Variables'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build project'
     inputs:
-      projects: 'src/Durable.Demo/*.csproj'
+      projects: '${{ parameters.workingDirectoryCode }}/*.csproj'
       arguments: '--output publish_output --configuration Release'
 
   - task: ArchiveFiles@2
@@ -40,7 +45,7 @@ jobs:
       rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
       includeRootFolder: false
       archiveType: zip
-      archiveFile: $(Build.ArtifactStagingDirectory)/$(appPrefix)$(Build.BuildId).zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/$(appName)-$(Build.BuildId).zip
       replaceExistingArchive: true
 
   - task: PublishPipelineArtifact@1

@@ -29,7 +29,7 @@ stages:
 - stage: BuildTester
   displayName: Build Tester
   jobs:
-  - ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
+  - ${{ if or(or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runPsRuleScan), 'true')), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
     - template: templates/scan-code-template.yml
       parameters:
         environmentName: 'DEV'

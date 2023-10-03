@@ -15,7 +15,7 @@
 #     CSV of analyzer categories to run. Values: code,artifacts,IaC,containers (Defaults to all)
 #   tools:
 #     CSV of analyzer tools to run. Example antimalware,bandit,binskim,eslint,templateanalyzer,terrascan,trivy
-#       AntiMalware: code, artifacts
+#       AntiMalware: code, artifacts  (>>> doesn't work when run on ubuntu agent...???)
 #       Bandit: python
 #       BinSkim: binary 
 #       ESlint: JavaScript
@@ -61,17 +61,39 @@ jobs:
   - job: GHAzDOScanJob
     displayName: GHAzDO Scan Job
     steps:
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "parameters.continueOnScanError=${{ parameters.continueOnScanError }}"
+          echo "parameters.workingDirectoryCode=${{ parameters.workingDirectoryCode }}"
+          echo "parameters.workingDirectoryIgnore=${{ parameters.workingDirectoryIgnore }}"
+          echo "Directory Listing for $(Pipeline.Workspace)"
+          tree $(Pipeline.Workspace)
+      displayName: 'Display Variables and Tree'
+      continueOnError: true
+          # dir $(Pipeline.Workspace) /s
+
     - task: AdvancedSecurity-Codeql-Init@1
       inputs:
         languages: 'csharp'
         querysuite: security-extended
-        codeqlpathstoinclude: ${{ parameters.workingDirectoryCode }}
-        codeqlpathstoignore: ${{ parameters.workingDirectoryIgnore }}
-        sourcesfolder: ${{ parameters.workingDirectoryCode }}
+      #   codeqlpathstoinclude: ${{ parameters.workingDirectoryCode }}
+      #   codeqlpathstoignore: ${{ parameters.workingDirectoryIgnore }}
+      #   sourcesfolder: ${{ parameters.workingDirectoryCode }}
+
     - task: DotNetCoreCLI@2
       inputs:
         command: 'restore'
+        projects: '${{ parameters.workingDirectoryCode }}/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build project test'
+      inputs:
+        projects: '${{ parameters.workingDirectoryCode }}/*.csproj'
+        arguments: '--output publish_output --configuration Release'
+
     - task: AdvancedSecurity-Dependency-Scanning@1
+      continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
     - task: AdvancedSecurity-Codeql-Autobuild@1
       # what does this auto-build really do...?  
@@ -95,27 +117,30 @@ jobs:
     - name: continueAfterScanErrors
       value: ${{ eq(parameters.continueOnScanError, 'true') }}
   steps:
-  - bash: |
-      echo "parameters.runDevSecOpsScan=${{parameters.runDevSecOpsScan}}"
-      echo "parameters.workingDirectoryCode=${{parameters.workingDirectoryCode}}"
-      echo "parameters.workingDirectoryInfra=${{parameters.workingDirectoryInfra}}"
-      echo "parameters.workingDirectoryIgnore=${{parameters.workingDirectoryIgnore}}"
-      echo "continueAfterScanErrors=$(continueAfterScanErrors)"
-      echo "parameters.continueOnScanError=${{parameters.continueOnScanError}}"
-    displayName: 'Display Variables'
-    continueOnError: true
-  - task: UseDotNet@2
-    displayName: 'Use dotnet 3.1.x'
-    inputs:
-      version: 3.1.x
-  - task: UseDotNet@2
-    displayName: 'Use dotnet 5.0.x'
-    inputs:
-      version: 5.0.x
-  - task: UseDotNet@2
-    displayName: 'Use dotnet 6.0'
-    inputs:
-      version: 6.0.x
+  - ${{ if ne(lower(parameters.runDevSecOpsScan), 'none') }}:
+    - bash: |
+        echo "parameters.runDevSecOpsScan=${{parameters.runDevSecOpsScan}}"
+        echo "parameters.workingDirectoryCode=${{parameters.workingDirectoryCode}}"
+        echo "parameters.workingDirectoryInfra=${{parameters.workingDirectoryInfra}}"
+        echo "parameters.workingDirectoryIgnore=${{parameters.workingDirectoryIgnore}}"
+        echo "continueAfterScanErrors=$(continueAfterScanErrors)"
+        echo "parameters.continueOnScanError=${{parameters.continueOnScanError}}"
+        echo "Directory Listing for $(Pipeline.Workspace)"
+        tree $(Pipeline.Workspace)
+      displayName: 'Display Variables'
+      continueOnError: true
+    - task: UseDotNet@2
+      displayName: 'Use dotnet 3.1.x'
+      inputs:
+        version: 3.1.x
+    - task: UseDotNet@2
+      displayName: 'Use dotnet 5.0.x'
+      inputs:
+        version: 5.0.x
+    - task: UseDotNet@2
+      displayName: 'Use dotnet 6.0'
+      inputs:
+        version: 6.0.x
 # ----------------------------------------------------------------------------------------------------
 # Old example with no parms works and does everything
 # ----------------------------------------------------------------------------------------------------
@@ -126,7 +151,7 @@ jobs:
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'generic'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
@@ -137,10 +162,17 @@ jobs:
     - task: MicrosoftSecurityDevOps@1
       displayName: Run Everything MS SecDevOps Scan
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "Directory of pipeline workspace: $(Pipeline.Workspace)"
+          tree $(Pipeline.Workspace)
+      displayName: 'Display Files'
+      continueOnError: true
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'scan_everything'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
@@ -152,12 +184,12 @@ jobs:
       displayName: Run Full Code Scan
       inputs:
         categories: code,artifacts
-        tools: antimalware,eslint,binskim
+        tools: eslint,binskim  # antimalware
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'scan_code_all_folders'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
@@ -174,7 +206,7 @@ jobs:
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'scan_infra_all_folders'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
@@ -186,14 +218,14 @@ jobs:
       displayName: Run 1D Code Scan
       inputs:
         categories: code,artifacts
-        tools: antimalware,eslint,binskim
+        tools: eslint,binskim  # antimalware
       env:
         gdn_run_workingdirectory: ${{ parameters.workingDirectoryCode }}
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'scan_code_one_folder'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
@@ -212,7 +244,7 @@ jobs:
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'scan_infra_one_folder'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
@@ -225,14 +257,14 @@ jobs:
       displayName: Run Bad Code Scan on Infra Folder
       inputs:
         categories: code,artifacts
-        tools: antimalware,eslint,binskim
+        tools: eslint,binskim  # antimalware
       env:
         gdn_run_workingdirectory: ${{ parameters.workingDirectoryInfra }}
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'scan_infra_folder_for_code'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 
@@ -252,7 +284,7 @@ jobs:
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:
-        pathToPublish: '$(System.ArtifactsDirectory)\.gdn\msdo.sarif'
+        pathToPublish: '$(System.ArtifactsDirectory)/.gdn/msdo.sarif'
         artifactName: 'scan_code_folder_for_infra'
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
 

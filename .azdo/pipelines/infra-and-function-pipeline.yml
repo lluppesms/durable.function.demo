@@ -36,7 +36,7 @@ parameters:
     values:
       - None
       - Scan_Everything
-    default: None
+    default: Scan_Everything
   - name: runPsRuleScan
     displayName: Run PSRule Bicep Scan
     type: boolean
@@ -58,6 +58,8 @@ stages:
       runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
       runPsRuleScan: ${{ parameters.runPsRuleScan }}
       runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
+      workingDirectoryCode: 'src/Durable.Demo'
+      workingDirectoryInfra: '/infra/bicep'
 - ${{ if eq(lower(parameters.deployQA), 'true') }}:
   - template: pipes/infra-and-function-pipe.yml
     parameters:
@@ -66,3 +68,5 @@ stages:
       runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
       runPsRuleScan: ${{ parameters.runPsRuleScan }}
       runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
+      workingDirectoryCode: 'src/Durable.Demo'
+      workingDirectoryInfra: '/infra/bicep'

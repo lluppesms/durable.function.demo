@@ -16,7 +16,7 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
+- ${{ if or(or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runPsRuleScan), 'true')), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
   - stage: ScanApplication
     displayName: Scan Application
     jobs:

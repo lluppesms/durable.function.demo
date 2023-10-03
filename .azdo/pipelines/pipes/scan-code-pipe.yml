@@ -9,7 +9,7 @@ parameters:
 - name: runGHAzDOScan
   default: 'false'
 - name:    workingDirectoryCode
-  default: 'src/Durable.Demo'
+  default: 'src/myproject'
 - name: workingDirectoryInfra
   default: '/infra/bicep'
 - name: workingDirectoryIgnore

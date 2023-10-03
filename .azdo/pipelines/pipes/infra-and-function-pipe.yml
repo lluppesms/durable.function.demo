@@ -13,24 +13,32 @@ parameters:
   default: 'true'
 - name: runGHAzDOScan
   default: 'false'
+- name: workingDirectoryCode
+  default: 'src/myproject'
+- name: workingDirectoryInfra
+  default: '/infra/bicep'
 
 # ----------------------------------------------------------------------------------------------------
 stages:
 - stage: BuildApplication
   displayName: Build Application
   jobs:
-  - ${{ if or(eq(lower(parameters.runDevSecOpsScan), 'true'), eq(lower(parameters.runPsRuleScan), 'true')) }}:
+  - ${{ if or(or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runPsRuleScan), 'true')), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
     - template: templates/scan-code-template.yml
       parameters:
         environmentName: 'DEV'
         runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
         runPsRuleScan: ${{ parameters.runPsRuleScan }}
         runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
+        workingDirectoryCode: ${{ parameters.workingDirectoryCode }}
+        workingDirectoryInfra: ${{ parameters.workingDirectoryInfra }}
 
   - template: templates/build-function-template.yml
     parameters:
       variableGroupName: ${{ parameters.variableGroupName }}
       environmentName: 'DEV'
+      workingDirectoryCode: ${{ parameters.workingDirectoryCode }}
+      workingDirectoryInfra: ${{ parameters.workingDirectoryInfra }}
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ each environmentName in parameters.environments }} :

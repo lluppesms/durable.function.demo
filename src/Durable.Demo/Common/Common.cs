@@ -99,12 +99,12 @@ public static class Common
 	}
 
 	/// <summary>
-	/// Sanitize connection string
+	/// Returns a sanitized connection string suitable for display on admin page
 	/// </summary>
 	public static string GetSanitizedConnectionString(string connection)
 	{
-		//// "DeviceConnectionString": "HostName=iothub123.azure-devices.net;DeviceId=test1;SharedAccessKey=...",
-		//// "SQLConnectionString": "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=...";
+        //// "DeviceConnectionString": "HostName=iothub123.azure-devices.net;DeviceId=test1;SharedAccessKey=Placeholder-E5Z6******=",
+        //// "SQLConnectionString": "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=Placeholder-myPassword";
 		string noKey;
 		if (string.IsNullOrEmpty(connection)) return string.Empty;
 		var keyPos = connection.IndexOf("key=", StringComparison.OrdinalIgnoreCase);
