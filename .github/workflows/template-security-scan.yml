@@ -59,7 +59,7 @@ jobs:
       #uses: microsoft/security-devops-action@preview
       id: msdo2
       with:
-        tools: antimalware, eslint, binskim
+        tools: antimalware,eslint,binskim
 
     - name: Run Full Infra Scan
       if: inputs.scanToRun == 'Scan_Infra_All_Folders' || inputs.scanToRun == 'All_Of_The_Above'
@@ -68,7 +68,7 @@ jobs:
       #uses: microsoft/security-devops-action@preview
       id: msdo3
       with:
-        tools: templateanalyzer,terrascan
+        tools: templateanalyzer,terrascan,trivy
 
       # this works to just scan source code directory...!
     - name: Run One Directory Code Scan
@@ -81,7 +81,7 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryCode }}
         run_workingdirectory: ${{ inputs.workingDirectoryCode }}
       with:
-        tools: antimalware, eslint, binskim
+        tools: antimalware,eslint,binskim
 
     # this works to just scan infra code directory...!
     - name: Run One Directory Infra Scan
@@ -94,7 +94,7 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
         run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
       with:
-        tools: templateanalyzer,terrascan
+        tools: templateanalyzer,terrascan,trivy
 
     # this should FAIL (but doesn't...) to find infra code and not throw any errors...!
     - name: Run Code Scan on Infra Folder
@@ -107,7 +107,7 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
         run_workingdirectory: ${{ inputs.workingDirectoryInfra }}
       with:
-        tools: antimalware, eslint, binskim
+        tools: antimalware,eslint,binskim
 
     # this should FAIL (but doesn't...) to find infra code and not throw any errors...!
     - name: Run Infra Scan on Code Folder
@@ -120,7 +120,7 @@ jobs:
         gdn_run_workingdirectory: ${{ inputs.workingDirectoryCode }}
         run_workingdirectory: ${{ inputs.workingDirectoryCode }}
       with:
-        tools: templateanalyzer,terrascan
+        tools: templateanalyzer,terrascan,trivy
 
     - name: Upload MS SecDevOps alerts to Security tab
       continue-on-error: true
