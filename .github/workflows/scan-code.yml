@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # GHA Workflow to do a security scan only
 # ------------------------------------------------------------------------------------------------------------------------
-name: scan.code
+name: security.devops.scan
 on: 
   workflow_dispatch:
     inputs:
@@ -14,9 +14,38 @@ on:
           - info
           - warning
           - debug 
-  
-# ------------------------------------------------------------------------------------------------------------------------
+      scanToRun:
+        description: Scan to Run
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - Scan_Everything
+          - Scan_Code_All_Folders
+          - Scan_Infra_All_Folders
+          - Scan_Code_One_Folder
+          - Scan_Infra_One_Folder
+          - Scan_Infra_Folder_For_Code
+          - Scan_Code_Folder_For_Infra
+          - All_Of_The_Above
+      workingDirectoryCode:
+        description: Code Folder
+        required: true
+        default: '/src/Durable.Demo'
+        type: string
+      workingDirectoryInfra:
+        description: Infra Folder
+        required: true
+        default: '/infra/bicep'
+        type: string
+
+  # ------------------------------------------------------------------------------------------------------------------------
 jobs:
   scan-code:
     name: Scan Source Code
     uses: ./.github/workflows/template-security-scan.yml
+    with: 
+      scanToRun: ${{ github.event.inputs.scanToRun }}
+      workingDirectoryCode: ${{ github.event.inputs.workingDirectoryCode }}
+      workingDirectoryInfra: ${{ github.event.inputs.workingDirectoryInfra }}
+      continueOnScanError: false

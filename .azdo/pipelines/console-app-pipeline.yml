@@ -36,6 +36,10 @@ parameters:
     displayName: Run PSRule Bicep Scan
     type: boolean
     default: false
+  - name: runGHAzDOScan
+    displayName: Run GHAS Scan
+    type: boolean
+    default: false
 
 # ----------------------------------------------------------------------------------------------------
 stages:
@@ -50,3 +54,4 @@ stages:
     exeName: 'Durable.Tester'
     runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
     runPsRuleScan: ${{ parameters.runPsRuleScan }}
+    runGHAzDOScan: ${{ parameters.runGHAzDOScan }}

@@ -31,15 +31,17 @@ parameters:
     default: false
   - name: runGHAzDOScan
     displayName: Run GHAS Scan
-    type: string
+    type: boolean
     default: false
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- template: pipes/templates/scan-code-template.yml
+- template: pipes/scan-code-pipe.yml
   parameters:
     runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
     runPsRuleScan: ${{ parameters.runPsRuleScan }}
     runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
     workingDirectoryCode: 'src/Durable.Demo'
     workingDirectoryInfra: '/infra/bicep'
+    workingDirectoryIgnore: '/docs'
+    #continueOnScanError: 'true'

@@ -21,6 +21,8 @@ parameters:
   default: 'true'
 - name: runPsRuleScan
   default: 'true'
+- name: runGHAzDOScan
+  default: 'false'
 
 # ------------------------------------------------------------------------------------------------------------------------
 stages:
@@ -33,6 +35,7 @@ stages:
         environmentName: 'DEV'
         runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
         runPsRuleScan: ${{ parameters.runPsRuleScan }}
+        runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
 
   - template: templates/console-app-build-template.yml
     parameters:

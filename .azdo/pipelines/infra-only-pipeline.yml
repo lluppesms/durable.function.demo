@@ -38,6 +38,10 @@ parameters:
     displayName: Run PSRule Bicep Scan
     type: boolean
     default: false
+  - name: runGHAzDOScan
+    displayName: Run GHAS Scan
+    type: boolean
+    default: false
 
 # ----------------------------------------------------------------------------------------------------
 # This approach to optionally deploy QA works but it's not DRY
@@ -50,6 +54,7 @@ stages:
       environments: ['DEV']
       runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
       runPsRuleScan: ${{ parameters.runPsRuleScan }}
+      runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
 - ${{ if eq(lower(parameters.deployQA), 'true') }}:
   - template: pipes/infra-only-pipe.yml
     parameters:
@@ -57,3 +62,4 @@ stages:
       environments: ['DEV','QA']
       runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
       runPsRuleScan: ${{ parameters.runPsRuleScan }}
+      runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
