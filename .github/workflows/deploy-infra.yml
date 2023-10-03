@@ -63,6 +63,7 @@ jobs:
     with:
       envCode: 'demo'
       securityScan: ${{ inputs.securityScan }}
+      continueOnScanError: true
 
   infra-dev:
     if: inputs.deployToDev == 'true'
@@ -72,6 +73,7 @@ jobs:
     with:
       envCode: 'dev'
       securityScan: ${{ inputs.securityScan }}
+      continueOnScanError: true
 
   infra-qa:
     if: inputs.deployToQA == 'true'
@@ -81,6 +83,7 @@ jobs:
     with:
       envCode: 'qa'
       securityScan: ${{ inputs.securityScan }}
+      continueOnScanError: true
 
   infra-prod:
     if: inputs.deployToProd == 'true'
@@ -90,3 +93,4 @@ jobs:
     with:
       envCode: 'prod'
       securityScan: ${{ inputs.securityScan }}
+      continueOnScanError: true

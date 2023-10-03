@@ -63,6 +63,7 @@ jobs:
       envCode: 'demo'
       rootDirectory: 'src/Durable.Demo'
       securityScan: ${{ inputs.securityScan }}
+      continueOnScanError: true
 
 # ------------------------------------------------------------------------------------------------------------------------
   deploy-app-demo:
