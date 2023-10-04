@@ -7,7 +7,18 @@ pool:
 
 # ----------------------------------------------------------------------------------------------------
 trigger:
-  - none
+  # - none
+  batch: true
+  branches:
+    include:
+      - main
+
+schedules:
+- cron: '0 12 * * 3'
+  displayName: Scan Every Wednesday
+  branches:
+    include:
+    - main
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
@@ -24,7 +35,7 @@ parameters:
       - Scan_Infra_Folder_For_Code
       - Scan_Code_Folder_For_Infra
       - All_Of_The_Above
-    default: None
+    default: Scan_Everything
   - name: runPsRuleScan
     displayName: Run PSRule Bicep Scan
     type: boolean
@@ -32,7 +43,7 @@ parameters:
   - name: runGHAzDOScan
     displayName: Run GHAS Scan
     type: boolean
-    default: false
+    default: true
 
 # ----------------------------------------------------------------------------------------------------
 stages:
