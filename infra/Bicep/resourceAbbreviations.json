@@ -1,0 +1,14 @@
+{
+    "appInsightsSuffix": "insights",
+    "appServicePlanSuffix": "appsvc",
+    "bastionAbbreviation": "bastion",
+    "keyVaultAbbreviation": "vault",
+    "logWorkspaceSuffix": "logworkspace",
+    "networkSecurityGroupAbbreviation": "nsg",
+    "privateEndpointAbbreviation": "pe",
+    "publicIpAbbreviation": "pip",
+    "sqlAbbreviation": "sql",
+    "storageAccountSuffix": "store",
+    "vnetAbbreviation": "vnet",
+    "webSiteSuffix": "web"
+}

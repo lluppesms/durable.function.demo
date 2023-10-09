@@ -1,4 +1,5 @@
 *.json
 !bicepconfig.json
+!resourceAbbreviations.json
 *.bicepTest
 test.bicep

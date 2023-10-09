@@ -9,6 +9,10 @@ param functionStorageNameSuffix string = 'func'
 param dataStorageNameSuffix string = 'data'
 
 // --------------------------------------------------------------------------------
+// pull resource abbreviations from a common JSON file
+var resourceAbbreviations = loadJsonContent('./resourceAbbreviations.json')
+
+// --------------------------------------------------------------------------------
 var lowerAppName = replace(toLower(appName), ' ', '')
 var sanitizedAppName = replace(replace(lowerAppName, '-', ''), '_', '')
 var sanitizedEnvironment = toLower(environmentCode)
@@ -20,12 +24,12 @@ var functionAppName = environmentCode == 'azd' ? '${lowerAppName}function' : toL
 var baseStorageName = toLower('${sanitizedAppName}${sanitizedEnvironment}str')
 
 // --------------------------------------------------------------------------------
-output logAnalyticsWorkspaceName string =  toLower('${lowerAppName}-${sanitizedEnvironment}-logworkspace')
+output logAnalyticsWorkspaceName string =  toLower('${lowerAppName}-${sanitizedEnvironment}-${resourceAbbreviations.logWorkspaceSuffix}}')
 output functionAppName string            = functionAppName
-output functionAppServicePlanName string = '${functionAppName}-appsvc'
-output functionInsightsName string       = '${functionAppName}-insights'
+output functionAppServicePlanName string = '${functionAppName}-${resourceAbbreviations.appServicePlanSuffix}'
+output functionInsightsName string       = '${functionAppName}-${resourceAbbreviations.appInsightsSuffix}'
 
 // Key Vaults and Storage Accounts can only be 24 characters long
-output keyVaultName string               = take(toLower('${sanitizedAppName}${sanitizedEnvironment}vault'), 24)
+output keyVaultName string               = take(toLower('${sanitizedAppName}${sanitizedEnvironment}${resourceAbbreviations.keyVaultAbbreviation}'), 24)
 output functionStorageName string        = take('${baseStorageName}${functionStorageNameSuffix}${uniqueString(resourceGroup().id)}', 24)
 output dataStorageName string            = take('${baseStorageName}${dataStorageNameSuffix}${uniqueString(resourceGroup().id)}', 24)

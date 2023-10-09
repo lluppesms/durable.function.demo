@@ -75,6 +75,8 @@ jobs:
       echo "  az group create --name $(resourceGroupName) --location $(location) --tags LastDeployed=$(runDateTime) Application=$(appName) Environment=$(environmentNameUpper)"
       echo "Bicep Deploy Sample Command:"
       echo "  az deployment group create -n main-deploy-$(runDateTimeZ) --resource-group $(resourceGroupName) --template-file 'main.bicep' --parameters environmentCode $(environmentNameLower) location $(location) appName $(appName) storageSku $(storageSku) functionAppSku $(functionAppSku) functionAppSkuFamily $(functionAppSkuFamily) functionAppSkuTier $(functionAppSkuTier) keyVaultOwnerUserId $(keyVaultOwnerUserId) twilioAccountSid $(twilioAccountSid) twilioAuthToken $(twilioAuthToken) twilioPhoneNumber $(twilioPhoneNumber) runDateTime $(runDateTime)"
+      echo "Directory of pipeline workspace:"
+      tree $(Pipeline.Workspace)
     displayName: 'Display Variables'
     continueOnError: true
 
