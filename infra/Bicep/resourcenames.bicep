@@ -24,7 +24,7 @@ var functionAppName = environmentCode == 'azd' ? '${lowerAppName}function' : toL
 var baseStorageName = toLower('${sanitizedAppName}${sanitizedEnvironment}str')
 
 // --------------------------------------------------------------------------------
-output logAnalyticsWorkspaceName string =  toLower('${lowerAppName}-${sanitizedEnvironment}-${resourceAbbreviations.logWorkspaceSuffix}}')
+output logAnalyticsWorkspaceName string =  toLower('${lowerAppName}-${sanitizedEnvironment}-${resourceAbbreviations.logWorkspaceSuffix}')
 output functionAppName string            = functionAppName
 output functionAppServicePlanName string = '${functionAppName}-${resourceAbbreviations.appServicePlanSuffix}'
 output functionInsightsName string       = '${functionAppName}-${resourceAbbreviations.appInsightsSuffix}'
