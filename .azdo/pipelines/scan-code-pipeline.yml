@@ -7,11 +7,11 @@ pool:
 
 # ----------------------------------------------------------------------------------------------------
 trigger:
-  # - none
-  batch: true
-  branches:
-    include:
-      - main
+ - none
+  # batch: true
+  # branches:
+  #   include:
+  #     - main
 
 schedules:
 - cron: '0 12 * * 3'
