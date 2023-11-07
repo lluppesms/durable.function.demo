@@ -8,9 +8,7 @@ parameters:
 - name: variableGroupName
   default: 'myVariableGroupName'
 - name: runDevSecOpsScan
-  default: 'true'
-- name: runPsRuleScan
-  default: 'true'
+  default: 'false'
 - name: runGHAzDOScan
   default: 'false'
 - name: workingDirectoryCode
@@ -23,12 +21,11 @@ stages:
 - stage: BuildApplication
   displayName: Build Application
   jobs:
-  - ${{ if or(or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runPsRuleScan), 'true')), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
+  - ${{ if or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
     - template: templates/scan-code-template.yml
       parameters:
         environmentName: 'DEV'
         runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-        runPsRuleScan: ${{ parameters.runPsRuleScan }}
         runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
         workingDirectoryCode: ${{ parameters.workingDirectoryCode }}
         workingDirectoryInfra: ${{ parameters.workingDirectoryInfra }}

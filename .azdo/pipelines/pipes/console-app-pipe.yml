@@ -18,9 +18,7 @@ parameters:
 - name: folderName
   default: 'myFolderName'
 - name: runDevSecOpsScan
-  default: 'true'
-- name: runPsRuleScan
-  default: 'true'
+  default: 'false'
 - name: runGHAzDOScan
   default: 'false'
 
@@ -29,12 +27,11 @@ stages:
 - stage: BuildTester
   displayName: Build Tester
   jobs:
-  - ${{ if or(or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runPsRuleScan), 'true')), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
+  - ${{ if or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
     - template: templates/scan-code-template.yml
       parameters:
         environmentName: 'DEV'
         runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-        runPsRuleScan: ${{ parameters.runPsRuleScan }}
         runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
 
   - template: templates/console-app-build-template.yml

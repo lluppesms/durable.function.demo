@@ -8,15 +8,13 @@ parameters:
 - name: variableGroupName
   default: 'myVariableGroupName'
 - name: runDevSecOpsScan
-  default: 'true'
-- name: runPsRuleScan
-  default: 'true'
+  default: 'false'
 - name: runGHAzDOScan
   default: 'false'
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if or(or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runPsRuleScan), 'true')), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
+- ${{ if or(ne(lower(parameters.runDevSecOpsScan), 'none'), eq(lower(parameters.runGHAzDOScan), 'true')) }}:
   - stage: ScanApplication
     displayName: Scan Application
     jobs:
@@ -24,7 +22,6 @@ stages:
       parameters:
         environmentName: 'DEV'
         runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-        runPsRuleScan: ${{ parameters.runPsRuleScan }}
         runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
 
 - ${{ each environmentName in parameters.environments }} :

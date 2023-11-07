@@ -39,7 +39,7 @@ parameters:
     values:
       - None
       - Scan_Code_All_Folders
-    default: Scan_Code_All_Folders
+    default: None
   - name: runGHAzDOScan
     displayName: Run GHAS Scan
     type: boolean

@@ -4,11 +4,9 @@
 parameters:
 - name: runDevSecOpsScan
   default: 'None'
-- name: runPsRuleScan
-  default: 'false'
 - name: runGHAzDOScan
   default: 'false'
-- name:    workingDirectoryCode
+- name: workingDirectoryCode
   default: 'src/myproject'
 - name: workingDirectoryInfra
   default: '/infra/bicep'
@@ -25,7 +23,6 @@ stages:
   - template: templates/scan-code-template.yml
     parameters:
       runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-      runPsRuleScan: ${{ parameters.runPsRuleScan }}
       runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
       workingDirectoryCode: ${{ parameters.workingDirectoryCode }}
       workingDirectoryInfra: ${{ parameters.workingDirectoryInfra }}
