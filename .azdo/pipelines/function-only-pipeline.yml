@@ -40,10 +40,6 @@ parameters:
       - None
       - Scan_Code_All_Folders
     default: Scan_Code_All_Folders
-  - name: runPsRuleScan
-    displayName: Run PSRule Bicep Scan
-    type: boolean
-    default: false
   - name: runGHAzDOScan
     displayName: Run GHAS Scan
     type: boolean
@@ -59,7 +55,6 @@ stages:
       variableGroupName: 'DurableDemo'
       environments: ['DEV']
       runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-      runPsRuleScan: ${{ parameters.runPsRuleScan }}
       runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
       workingDirectoryCode: 'src/Durable.Demo'
       workingDirectoryInfra: '/infra/bicep'
@@ -69,7 +64,6 @@ stages:
       variableGroupName: 'DurableDemo'
       environments: ['DEV','QA']
       runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-      runPsRuleScan: ${{ parameters.runPsRuleScan }}
       runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
       workingDirectoryCode: 'src/Durable.Demo'
       workingDirectoryInfra: '/infra/bicep'

@@ -36,10 +36,6 @@ parameters:
       - Scan_Code_Folder_For_Infra
       - All_Of_The_Above
     default: Scan_Everything
-  - name: runPsRuleScan
-    displayName: Run PSRule Bicep Scan
-    type: boolean
-    default: false
   - name: runGHAzDOScan
     displayName: Run GHAS Scan
     type: boolean
@@ -50,7 +46,6 @@ stages:
 - template: pipes/scan-code-pipe.yml
   parameters:
     runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-    runPsRuleScan: ${{ parameters.runPsRuleScan }}
     runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
     workingDirectoryCode: 'src/Durable.Demo'
     workingDirectoryInfra: '/infra/bicep'
