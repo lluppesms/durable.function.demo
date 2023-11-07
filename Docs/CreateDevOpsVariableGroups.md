@@ -21,6 +21,7 @@ To create these variable groups, customize and run this command in the Azure Clo
          functionAppSku='Y1' 
          functionAppSkuFamily='Y' 
          functionAppSkuTier='Dynamic' 
+         resourceGroupPrefix='rg_durable_function'
          runSecurityDevOpScan='false'
          keyVaultOwnerUserId='owner1SID'
          twilioAccountSid='<twilioAccountSid>'

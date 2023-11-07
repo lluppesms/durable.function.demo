@@ -39,7 +39,7 @@ jobs:
     
     env:
       generatedAppEnvName: ${{ vars.APP_NAME }}-${{ inputs.envCode }}
-      generatedResourceGroupName: rg-${{ vars.APP_NAME }}-${{ inputs.envCode }}
+      generatedResourceGroupName: ${{ vars.RESOURCEGROUPPREFIX }}_${{ inputs.envCode }}
 
     steps:
     - name: Display Variables
@@ -71,7 +71,8 @@ jobs:
     - name: Log into Azure
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
+        #creds: ...${secrets.AZURE_CREDENTIALS}... # old way of doing this, but the secrets are not as secure...
 
     - name: Create Resource Group
       run: 

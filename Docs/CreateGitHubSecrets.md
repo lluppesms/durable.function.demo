@@ -15,12 +15,10 @@ It should look something like this:
 AZURE_CREDENTIALS:
 
 ``` bash
-{
-  "clientId": "<GUID>", 
-  "clientSecret": "<GUID>", 
-  "subscriptionId": "<GUID>", 
-  "tenantId": "<GUID>"
-}
+gh secret set AZURE_CLIENT_ID -b '<GUID>'
+gh secret set AZURE_CLIENT_SECRET -b '<GUID>'
+gh secret set AZURE_TENANT_ID -b '<GUID>'
+gh secret set AZURE_SUBSCRIPTION_ID -b '<yourAzureSubscriptionId>'
 ```
 
 ---
@@ -36,7 +34,6 @@ Required Secret Values:
 ``` bash
 gh auth login
 
-gh secret set AZURE_SUBSCRIPTION_ID -b '<yourAzureSubscriptionId>'
 gh secret set KEYVAULT_OWNER_USERID -b '<owner1SID>'
 ```
 
@@ -51,6 +48,7 @@ gh secret set TWILIOPHONENUMBER -b '<twilioPhoneNumber>'
 Required Repository Variables:
 
 ``` bash
+gh variable set RESOURCEGROUPPREFIX -b 'rg_durable_function_gha'
 gh variable set APP_NAME -b '<yourInitials>-durableg'
 gh variable set AZURE_LOCATION -b 'eastus2'
 gh variable set STORAGE_SKU -b 'Standard_LRS'
