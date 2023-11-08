@@ -43,8 +43,6 @@ parameters:
     default: false
 
 # ----------------------------------------------------------------------------------------------------
-# This approach to optionally deploy QA works but it's not DRY
-# ----------------------------------------------------------------------------------------------------
 stages:
 - ${{ if eq(lower(parameters.deployQA), 'false') }}:
   - template: pipes/infra-only-pipe.yml
