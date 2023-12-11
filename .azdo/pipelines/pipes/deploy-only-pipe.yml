@@ -9,6 +9,7 @@ parameters:
   default: 'myVariableGroupName'
 
 # ----------------------------------------------------------------------------------------------------
+stages:
 - ${{ each environmentName in parameters.environments }} :
   - stage: DeployApp${{ environmentName }}
     displayName: Deploy ${{ environmentName }} Application
