@@ -1,0 +1,58 @@
+# ----------------------------------------------------------------------------------------------------
+# Pipeline to deploy a Function App from an existing artifact
+# This pipeline assumes that the artifact has already been created by a previous pipeline
+# ----------------------------------------------------------------------------------------------------
+# Note: This pipeline needs a variable group "DurableDemo"
+#  See ../Docs/Create-Variable-Group.md for details
+# ----------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: windows-latest
+variables:
+  - group: DurableDemo
+
+# ----------------------------------------------------------------------------------------------------
+trigger:
+  # since this repo has both AzDO and GHA pipelines, nothing is run automatically...
+  - none
+  # batch: true
+  # branches:
+  #   include:
+  #     - main
+  # paths:
+  #   include:
+  #     - FunctionApp
+  #   exclude: 
+  #     - '**/*.yml'
+  #     - '**/*.yaml'
+  #     - '**/*.bicep'
+  #     - '**/*.md'
+
+# ----------------------------------------------------------------------------------------------------
+resources:
+  pipelines:
+  - pipeline: durable.demo.app.only
+    source: durable.demo.app.only
+    branch: main
+
+# ----------------------------------------------------------------------------------------------------
+parameters:
+  - name: deployQA
+    displayName: Deploy to QA
+    type: boolean
+    default: false
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- ${{ if eq(lower(parameters.deployQA), 'false') }}:
+  - template: pipes/deploy-only-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV']
+      pipelineResourceIdentifier: 'durable.demo.app.only'
+- ${{ if eq(lower(parameters.deployQA), 'true') }}:
+  - template: pipes/deploy-only-pipe.yml
+    parameters:
+      variableGroupName: 'DurableDemo'
+      environments: ['DEV','QA']
+      pipelineResourceIdentifier: 'durable.demo.app.only'

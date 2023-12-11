@@ -6,6 +6,9 @@ parameters:
   default:  'myVariableGroup'
 - name: environmentName
   default:  'DEV'
+# if this template should deploy a pre-built resource, then supply the name of the pipeline that built it
+- name: pipelineResourceIdentifier
+  default: '' # e.g. 'durable.demo.app.only'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
@@ -19,17 +22,69 @@ jobs:
     - group: ${{ parameters.variableGroupName }}
     - name: environmentName
       value: ${{ parameters.environmentName }}
+    - name: pipelineResourcePath
+      value: '$(Pipeline.Workspace)\${{ parameters.pipelineResourceIdentifier }}'
+    - name: pipelineResourceDropPath
+      value: '$(Pipeline.Workspace)\${{ parameters.pipelineResourceIdentifier }}\drop'
 
   steps:
   - bash: |
       functionAppName=$(echo "$(appName)-$(environmentName)" | tr '[:upper:]' '[:lower:]')
       echo "##vso[task.setvariable variable=functionAppName]$functionAppName"
+      echo "----------------------------------------"
+      echo "Display Current Environment Variables:"
+      printenv | sort
     displayName: 'Create Variables'
 
-  - task: DownloadPipelineArtifact@2
-    displayName: 'Download Pipeline Artifacts'
-    inputs:
-      artifact: drop
+  # ----------------------------------------------------------------------------------------------------
+  # if a previously built Pipeline Resource WAS supplied, then show info about the it and copy it over
+  # ----------------------------------------------------------------------------------------------------
+  - ${{ if ne(parameters.pipelineResourceIdentifier, '') }}:
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "Build Artifact Name: ${{ parameters.pipelineResourceIdentifier }}"
+          echo "pipelineResourcePath: $(pipelineResourcePath)"
+          echo "pipelineResourceDropPath: $(pipelineResourceDropPath)"
+          echo "projectID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.projectID)"
+          echo "pipelineName: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.pipelineName)"
+          echo "pipelineID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.pipelineID)"
+          echo "runName: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runName)"
+          echo "runID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runID)"
+          echo "runURI: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runURI)"
+          echo "sourceBranch: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.sourceBranch)"
+          echo "sourceCommit: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.sourceCommit)"
+          echo "sourceProvider: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.sourceProvider)"
+          echo "requestedFor: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedFor)"
+          echo "requestedForID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedForID)"
+      displayName: 'Display Artifact Info'
+
+    - download: ${{ parameters.pipelineResourceIdentifier }}
+      displayName: Download Artifact Files
+      
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "Directory of $(pipelineResourcePath):"
+          dir $(pipelineResourcePath) /s
+      displayName: 'Display Artifact Files'
+      continueOnError: true
+
+    - task: CopyFiles@2
+      displayName: Copy Artifact Files to Root
+      inputs:
+        sourceFolder: '$(pipelineResourceDropPath)'
+        targetFolder: '$(Pipeline.Workspace)'
+
+  # ----------------------------------------------------------------------------------------------------
+  # if a previously built Pipeline Resource was NOT supplied, then the artifact was built here and should be downloaded
+  # ----------------------------------------------------------------------------------------------------
+  - ${{ if eq(parameters.pipelineResourceIdentifier, '') }}:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download Pipeline Artifacts'
+      inputs:
+        artifact: drop
+      continueOnError: true
 
   - task: CmdLine@2
     inputs:
@@ -40,6 +95,7 @@ jobs:
         echo "functionAppName=$(functionAppName)"
         echo "Directory of pipeline workspace:"
         tree $(Pipeline.Workspace)
+        dir $(Pipeline.Workspace) /s
     displayName: 'Display Variables and Tree'
     continueOnError: true
 
