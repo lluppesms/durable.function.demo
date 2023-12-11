@@ -1,0 +1,19 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline Template to deploy Application from an existing artifact
+# ------------------------------------------------------------------------------------------------------------------------
+parameters:
+- name: environments
+  type: object
+  default: ['DEV']
+- name: variableGroupName
+  default: 'myVariableGroupName'
+
+# ----------------------------------------------------------------------------------------------------
+- ${{ each environmentName in parameters.environments }} :
+  - stage: DeployApp${{ environmentName }}
+    displayName: Deploy ${{ environmentName }} Application
+    jobs:
+    - template: templates/deploy-function-template.yml
+      parameters:
+        variableGroupName: ${{ parameters.variableGroupName }}
+        environmentName: ${{ environmentName }}
