@@ -49,7 +49,7 @@ jobs:
           echo "sourceProvider: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.sourceProvider)"
           echo "requestedFor: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedFor)"
           echo "requestedForID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedForID)"
-          echo "Directory of pipeline workspace:"
+          echo "Tree of pipeline workspace:"
           tree $(Pipeline.Workspace)
           echo "Directory of pipeline workspace:"
           dir $(Pipeline.Workspace) /s
@@ -59,15 +59,25 @@ jobs:
       continueOnError: true
 
     - download: ${{ parameters.pipelineResourceIdentifier }}
-      artifact: drop
-      patterns: '**/.**'
-      displayName: Download Drop Artifact
+      displayName: Download Pipeline Artifact
       
     - task: CopyFiles@2
       displayName: Copy Resource Artifacts
       inputs:
         sourceFolder: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
         targetFolder: '$(System.DefaultWorkingDirectory)/drop'
+      continueOnError: true
+
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "Tree of pipeline workspace:"
+          tree $(Pipeline.Workspace)
+          echo "Directory of pipeline workspace:"
+          dir $(Pipeline.Workspace) /s
+          echo "Directory of default working directory:"
+          dir $(System.DefaultWorkingDirectory) /s
+      displayName: 'Display Artifact Info' # for artifact $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runName)'
       continueOnError: true
 
   # if a Pipeline Resource was NOT supplied, then the artifact should be a simple download
