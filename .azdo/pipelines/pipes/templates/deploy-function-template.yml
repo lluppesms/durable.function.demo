@@ -32,7 +32,9 @@ jobs:
   - bash: printenv | sort
     displayName: 'PrintEnv'
   
-  # if a Pipeline Resource WAS supplied, then display info about the artifact and copy it over
+  # ----------------------------------------------------------------------------------------------------
+  # if a previously built Pipeline Resource WAS supplied, then show info about the it and copy it over
+  # ----------------------------------------------------------------------------------------------------
   - ${{ if ne(parameters.pipelineResourceIdentifier, '') }}:
     - task: CmdLine@2
       inputs:
@@ -54,23 +56,32 @@ jobs:
     - download: ${{ parameters.pipelineResourceIdentifier }}
       displayName: Download Pipeline Artifact
       
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo "Directory of Pipeline.Workspace/${{ parameters.pipelineResourceIdentifier }} directory:"
+          dir $(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }} /s
+      displayName: 'Display Artifact Files 1'
+      continueOnError: true
+
     - task: CopyFiles@2
-      displayName: Copy Artifact to Drop
+      displayName: Copy Artifact Zip Files to Root
       inputs:
         sourceFolder: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
         targetFolder: '$(Pipeline.Workspace)'
         Contents: '**/.zip'
-      continueOnError: true
 
     - task: CmdLine@2
       inputs:
         script: |
-          echo "Directory of default working directory:"
-          dir $(System.DefaultWorkingDirectory) /s
-      displayName: 'Display Artifact Files'
+          echo "Directory of Pipeline.Workspace directory:"
+          dir $(Pipeline.Workspace) /s
+      displayName: 'Display Artifact Files 2'
       continueOnError: true
 
-  # if a Pipeline Resource was NOT supplied, then the artifact should be a simple download
+  # ----------------------------------------------------------------------------------------------------
+  # if a previously built Pipeline Resource was NOT supplied, then the artifact was built here and should be downloaded
+  # ----------------------------------------------------------------------------------------------------
   - ${{ if eq(parameters.pipelineResourceIdentifier, '') }}:
     - task: DownloadPipelineArtifact@2
       displayName: 'Download Pipeline Artifacts'
