@@ -31,7 +31,8 @@ jobs:
   - bash: |
       functionAppName=$(echo "$(appName)-$(environmentName)" | tr '[:upper:]' '[:lower:]')
       echo "##vso[task.setvariable variable=functionAppName]$functionAppName"
-      echo "Environment Variables:"
+      echo "----------------------------------------"
+      echo "Display Current Environment Variables:"
       printenv | sort
     displayName: 'Create Variables'
 
