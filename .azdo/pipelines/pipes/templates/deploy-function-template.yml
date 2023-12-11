@@ -28,7 +28,14 @@ jobs:
       echo "##vso[task.setvariable variable=functionAppName]$functionAppName"
     displayName: 'Create Variables'
 
-  - ${{ if ne(lower(parameters.pipelineResourceIdentifier), '') }}:
+  - bash: |
+      echo "Build Artifact Name: ${{ parameters.pipelineResourceIdentifier }}"
+      echo "Directory of pipeline workspace:"
+      tree $(Pipeline.Workspace)
+    displayName: 'Display Artifact Parm'
+
+  # if a Pipeline Resource WAS supplied, then display info about the artifact
+  - ${{ if ne(parameters.pipelineResourceIdentifier, '') }}:
     - bash: |
         echo "Build Artifact Name: ${{ parameters.pipelineResourceIdentifier }}"
         echo "projectID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.projectID)"
@@ -45,15 +52,15 @@ jobs:
       displayName: Info for artifact $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runName)
 
   # if a Pipeline Resource WAS supplied, then the artifact should copied over
-  - ${{ if ne(lower(parameters.pipelineResourceIdentifier), '') }}:
+  - ${{ if ne(parameters.pipelineResourceIdentifier, '') }}:
     - task: CopyFiles@2
-      displayName: Copy resource Build Artifact for build $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runName)
+      displayName: Copy Resource Artifacts
       inputs:
         sourceFolder: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
         targetFolder: '$(System.DefaultWorkingDirectory)/drop'
 
   # if a Pipeline Resource was NOT supplied, then the artifact should be a simple download
-  - ${{ if eq(lower(parameters.pipelineResourceIdentifier), '') }}:
+  - ${{ if eq(parameters.pipelineResourceIdentifier, '') }}:
     - task: DownloadPipelineArtifact@2
       displayName: 'Download Pipeline Artifacts'
       inputs:

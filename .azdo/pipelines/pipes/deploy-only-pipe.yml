@@ -20,4 +20,4 @@ stages:
       parameters:
         variableGroupName: ${{ parameters.variableGroupName }}
         environmentName: ${{ environmentName }}
-        pipelineResourceIdentifier:  ${{ parameters.pipelineResourceIdentifier }}
+        pipelineResourceIdentifier: ${{ parameters.pipelineResourceIdentifier }}

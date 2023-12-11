@@ -33,7 +33,7 @@ resources:
   pipelines:
   - pipeline: durable.demo.app.only
     source: durable.demo.app.only
-    #branch: main
+    branch: main
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
@@ -49,8 +49,10 @@ stages:
     parameters:
       variableGroupName: 'DurableDemo'
       environments: ['DEV']
+      pipelineResourceIdentifier: 'durable.demo.app.only'
 - ${{ if eq(lower(parameters.deployQA), 'true') }}:
   - template: pipes/deploy-only-pipe.yml
     parameters:
       variableGroupName: 'DurableDemo'
       environments: ['DEV','QA']
+      pipelineResourceIdentifier: 'durable.demo.app.only'
