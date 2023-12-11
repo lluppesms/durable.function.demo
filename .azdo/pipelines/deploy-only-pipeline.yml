@@ -45,12 +45,12 @@ parameters:
 # ----------------------------------------------------------------------------------------------------
 stages:
 - ${{ if eq(lower(parameters.deployQA), 'false') }}:
-  - template: pipes/function-only-pipe.yml
+  - template: pipes/deploy-only-pipe.yml
     parameters:
       variableGroupName: 'DurableDemo'
       environments: ['DEV']
 - ${{ if eq(lower(parameters.deployQA), 'true') }}:
-  - template: pipes/function-only-pipe.yml
+  - template: pipes/deploy-only-pipe.yml
     parameters:
       variableGroupName: 'DurableDemo'
       environments: ['DEV','QA']
