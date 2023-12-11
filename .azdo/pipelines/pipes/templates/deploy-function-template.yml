@@ -23,9 +23,9 @@ jobs:
     - name: environmentName
       value: ${{ parameters.environmentName }}
     - name: pipelineResourcePath
-      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }'
+      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}'
     - name: pipelineResourceDropPath
-      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }/drop'
+      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
 
   steps:
   - bash: |
