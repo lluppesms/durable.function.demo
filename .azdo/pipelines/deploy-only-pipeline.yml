@@ -33,7 +33,7 @@ resources:
   pipelines:
   - pipeline: durable.demo.app.only
     source: drop
-    branches: main
+    branch: main
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
