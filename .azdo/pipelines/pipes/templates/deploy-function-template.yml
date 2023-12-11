@@ -29,6 +29,9 @@ jobs:
       echo "##vso[task.setvariable variable=functionAppName]$functionAppName"
     displayName: 'Create Variables'
 
+  - bash: printenv | sort
+    displayName: 'PrintEnv'
+  
   # if a Pipeline Resource WAS supplied, then display info about the artifact and copy it over
   - ${{ if ne(parameters.pipelineResourceIdentifier, '') }}:
     - task: CmdLine@2
@@ -55,6 +58,11 @@ jobs:
       displayName: 'Display Artifact Info' # for artifact $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runName)'
       continueOnError: true
 
+    - download: ${{ parameters.pipelineResourceIdentifier }}
+      artifact: drop
+      patterns: '**/.**'
+      displayName: Download Drop Artifact
+      
     - task: CopyFiles@2
       displayName: Copy Resource Artifacts
       inputs:
