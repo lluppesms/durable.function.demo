@@ -32,8 +32,8 @@ trigger:
 resources:
   pipelines:
   - pipeline: durable.demo.app.only
-    source: drop
-    branch: main
+    source: durable.demo.app.only
+    #branch: main
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
