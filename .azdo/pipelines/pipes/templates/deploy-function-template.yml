@@ -6,6 +6,7 @@ parameters:
   default:  'myVariableGroup'
 - name: environmentName
   default:  'DEV'
+# if this template should deploy a pre-built resource, then supply the name of the pipeline that built it
 - name: pipelineResourceIdentifier
   default: '' # e.g. 'durable.demo.app.only'
 
@@ -47,13 +48,19 @@ jobs:
           echo "requestedForID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedForID)"
           echo "Directory of pipeline workspace:"
           tree $(Pipeline.Workspace)
+          echo "Directory of pipeline workspace:"
+          dir $(Pipeline.Workspace) /s
+          echo "Directory of default working directory:"
+          dir $(System.DefaultWorkingDirectory) /s
       displayName: 'Display Artifact Info' # for artifact $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runName)'
+      continueOnError: true
 
     - task: CopyFiles@2
       displayName: Copy Resource Artifacts
       inputs:
         sourceFolder: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
         targetFolder: '$(System.DefaultWorkingDirectory)/drop'
+      continueOnError: true
 
   # if a Pipeline Resource was NOT supplied, then the artifact should be a simple download
   - ${{ if eq(parameters.pipelineResourceIdentifier, '') }}:
@@ -61,6 +68,7 @@ jobs:
       displayName: 'Download Pipeline Artifacts'
       inputs:
         artifact: drop
+      continueOnError: true
 
   - task: CmdLine@2
     inputs:
