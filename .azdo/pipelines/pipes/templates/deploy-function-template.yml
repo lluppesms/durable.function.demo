@@ -23,9 +23,9 @@ jobs:
     - name: environmentName
       value: ${{ parameters.environmentName }}
     - name: pipelineResourcePath
-      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}'
+      value: '$(Pipeline.Workspace)\${{ parameters.pipelineResourceIdentifier }}'
     - name: pipelineResourceDropPath
-      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
+      value: '$(Pipeline.Workspace)\${{ parameters.pipelineResourceIdentifier }}\drop'
 
   steps:
   - bash: |
@@ -57,55 +57,24 @@ jobs:
           echo "sourceProvider: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.sourceProvider)"
           echo "requestedFor: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedFor)"
           echo "requestedForID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedForID)"
-      displayName: 'Display Artifact Info' # for artifact $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.runName)'
+      displayName: 'Display Artifact Info'
 
     - download: ${{ parameters.pipelineResourceIdentifier }}
-      displayName: Download Pipeline Artifact
+      displayName: Download Artifact Files
       
     - task: CmdLine@2
       inputs:
         script: |
           echo "Directory of $(pipelineResourcePath):"
           dir $(pipelineResourcePath) /s
-      displayName: 'Display Artifact Files 1'
+      displayName: 'Display Artifact Files'
       continueOnError: true
 
     - task: CopyFiles@2
-      displayName: Copy Artifact Zip Files to Root
+      displayName: Copy Artifact Files to Root
       inputs:
         sourceFolder: '$(pipelineResourceDropPath)'
         targetFolder: '$(Pipeline.Workspace)'
-        #Contents: '**/.zip'
-
-    - task: CmdLine@2
-      inputs:
-        script: |
-          echo "Directory of Pipeline.Workspace directory:"
-          dir $(Pipeline.Workspace) /s
-      displayName: 'Display Artifact Files 2'
-      continueOnError: true
-
-
-    # - task: CmdLine@2
-    #   inputs:
-    #     script: |
-    #       echo "Directory of Pipeline.Workspace ${{ parameters.pipelineResourceIdentifier }} directory:"
-    #       dir $(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }} /s
-    #   displayName: 'Display Artifact Files 1'
-    #   continueOnError: true
-    # - task: CopyFiles@2
-    #   displayName: Copy Artifact Zip Files to Root
-    #   inputs:
-    #     sourceFolder: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
-    #     targetFolder: '$(Pipeline.Workspace)'
-    #     Contents: '**/.zip'
-    # - task: CmdLine@2
-    #   inputs:
-    #     script: |
-    #       echo "Directory of Pipeline.Workspace directory:"
-    #       dir $(Pipeline.Workspace) /s
-    #   displayName: 'Display Artifact Files 2'
-    #   continueOnError: true
 
   # ----------------------------------------------------------------------------------------------------
   # if a previously built Pipeline Resource was NOT supplied, then the artifact was built here and should be downloaded
@@ -126,6 +95,7 @@ jobs:
         echo "functionAppName=$(functionAppName)"
         echo "Directory of pipeline workspace:"
         tree $(Pipeline.Workspace)
+        dir $(Pipeline.Workspace) /s
     displayName: 'Display Variables and Tree'
     continueOnError: true
 
