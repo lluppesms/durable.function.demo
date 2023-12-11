@@ -7,6 +7,8 @@ parameters:
   default: ['DEV']
 - name: variableGroupName
   default: 'myVariableGroupName'
+- name: pipelineResourceIdentifier
+  default: '' # e.g. 'durable.demo.app.only'
 
 # ----------------------------------------------------------------------------------------------------
 stages:
@@ -18,3 +20,4 @@ stages:
       parameters:
         variableGroupName: ${{ parameters.variableGroupName }}
         environmentName: ${{ environmentName }}
+        pipelineResourceIdentifier:  ${{ parameters.pipelineResourceIdentifier }}
