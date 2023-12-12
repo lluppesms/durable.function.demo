@@ -8,7 +8,7 @@ parameters:
 - name: variableGroupName
   default: 'myVariableGroupName'
 - name: pipelineResourceIdentifier
-  default: '' # e.g. 'durable.demo.app.only'
+  default: '' # internal identifier for the resource
 
 # ----------------------------------------------------------------------------------------------------
 stages:

@@ -31,9 +31,9 @@ trigger:
 # ----------------------------------------------------------------------------------------------------
 resources:
   pipelines:
-  - pipeline: durable.demo.app.only
-    source: durable.demo.app.only
-    branch: main
+  - pipeline: durable.demo.app.only # internal identifier for the resource
+    source: durable.demo.app.only   # name of the pipeline that produces an artifact
+    branch: main                    # should only allow builds from the main branch to be used
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
