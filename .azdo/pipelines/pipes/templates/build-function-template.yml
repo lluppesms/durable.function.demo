@@ -2,14 +2,10 @@
 # Template to build Azure Function and create artifacts
 # ----------------------------------------------------------------------------------------------------
 parameters: 
-- name: variableGroupName
-  default:  'myVariableGroup'
 - name: environmentName
   default:  'DEV'
-- name: workingDirectoryCode
+- name: appFolderName
   default: '/src/myProject'
-- name: workingDirectoryInfra
-  default: '/infra/bicep'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
@@ -20,23 +16,20 @@ jobs:
 - job: Build${{ parameters.environmentName }}Function
   displayName: Build ${{ parameters.environmentName }} Function
   
-  variables:
-    - group: ${{ parameters.variableGroupName }}
-
   steps:
   - bash: |
       echo "Build.ArtifactStagingDirectory=$(Build.ArtifactStagingDirectory)"
       echo "System.DefaultWorkingDirectory=$(System.DefaultWorkingDirectory)"
       echo "Build.BuildId=$(Build.BuildId)"
       echo "appName=$(appName)"
-      echo "parameters.workingDirectoryCode=${{ parameters.workingDirectoryCode }}"
+      echo "parameters.appFolderName=${{ parameters.appFolderName }}"
     continueOnError: true
     displayName: 'Display Variables'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build project'
     inputs:
-      projects: '${{ parameters.workingDirectoryCode }}/*.csproj'
+      projects: '${{ parameters.appFolderName }}/*.csproj'
       arguments: '--output publish_output --configuration Release'
 
   - task: ArchiveFiles@2

@@ -4,6 +4,6 @@ This project has GitHub Actions workflows that will build and deploy the applica
 
 ## Steps to Deploy App to Azure
 
-- [Create Repository Secrets](/Docs/CreateGitHubSecrets.md)
+- [Create Repository Secrets](/.github/CreateGitHubSecrets.md)
 - Trigger the workflow "deploy.infra" in GitHub to deploy the infrastructure
 - Trigger the workflow "deploy.app" in GitHub to deploy the app

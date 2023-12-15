@@ -1,13 +1,12 @@
 # ----------------------------------------------------------------------------------------------------
 # Pipeline to deploy a Function App from an existing artifact
-# This pipeline assumes that the artifact has already been created by a previous pipeline
+# See readme file for info about variable group "DurableDemo"
 # ----------------------------------------------------------------------------------------------------
-# Note: This pipeline needs a variable group "DurableDemo"
-#  See ../Docs/Create-Variable-Group.md for details
+# NOTE: This pipeline assumes that the artifact has already been created by a previous pipeline
 # ----------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
-  vmImage: windows-latest
+  vmImage: ubuntu-latest
 variables:
   - group: DurableDemo
 
@@ -31,28 +30,27 @@ trigger:
 # ----------------------------------------------------------------------------------------------------
 resources:
   pipelines:
-  - pipeline: durable.demo.app.only # internal identifier for the resource
-    source: durable.demo.app.only   # name of the pipeline that produces an artifact
+  - pipeline: durable.function-only # internal identifier for the resource
+    source: durable.function-only   # name of the pipeline that produces an artifact
     branch: main                    # should only allow builds from the main branch to be used
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
-  - name: deployQA
-    displayName: Deploy to QA
+  - name: deployMultiStage
+    displayName: Multi-Stage Deploy
     type: boolean
     default: false
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if eq(lower(parameters.deployQA), 'false') }}:
+- ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
   - template: pipes/deploy-only-pipe.yml
     parameters:
-      variableGroupName: 'DurableDemo'
-      environments: ['DEV']
-      pipelineResourceIdentifier: 'durable.demo.app.only'
-- ${{ if eq(lower(parameters.deployQA), 'true') }}:
+      environments: ['DEMO']
+      pipelineResourceIdentifier: 'durable.function-only'
+
+- ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
   - template: pipes/deploy-only-pipe.yml
     parameters:
-      variableGroupName: 'DurableDemo'
       environments: ['DEV','QA']
-      pipelineResourceIdentifier: 'durable.demo.app.only'
+      pipelineResourceIdentifier: 'durable.function-only'

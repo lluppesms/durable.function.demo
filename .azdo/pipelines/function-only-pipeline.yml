@@ -1,12 +1,10 @@
 # ----------------------------------------------------------------------------------------------------
 # Pipeline to deploy a Function App
-# ----------------------------------------------------------------------------------------------------
-# Note: This pipeline needs a variable group "DurableDemo"
-#  See ../Docs/Create-Variable-Group.md for details
+# See readme file for info about variable group "DurableDemo"
 # ----------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
-  vmImage: windows-latest
+  vmImage: ubuntu-latest
 variables:
   - group: DurableDemo
 
@@ -29,19 +27,16 @@ trigger:
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
-  - name: deployQA
-    displayName: Deploy to QA
+  - name: deployMultiStage
+    displayName: Multi-Stage Deploy
     type: boolean
     default: false
-  - name: runDevSecOpsScan
-    displayName: Run MS DevSecOps Scan
-    type: string
-    values:
-      - None
-      - Scan_Code_All_Folders
-    default: None
-  - name: runGHAzDOScan
+  - name: runGHASScan
     displayName: Run GHAS Scan
+    type: boolean
+    default: false
+  - name: runMSDevSecOpsScan
+    displayName: Run MS DevSecOps Scan
     type: boolean
     default: false
 
@@ -49,21 +44,23 @@ parameters:
 # This approach to optionally deploy QA works but it's not DRY
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if eq(lower(parameters.deployQA), 'false') }}:
+- ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
   - template: pipes/function-only-pipe.yml
     parameters:
-      variableGroupName: 'DurableDemo'
-      environments: ['DEV']
-      runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-      runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
-      workingDirectoryCode: 'src/Durable.Demo'
-      workingDirectoryInfra: '/infra/bicep'
-- ${{ if eq(lower(parameters.deployQA), 'true') }}:
+      environments: ['DEMO']
+      appFolderName: 'src/Durable.Demo'
+      appSolutionName: 'Durable.Demo'
+      appProjectFolderName: 'src/Durable.Demo'
+      runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+      runGHASScan: ${{ parameters.runGHASScan }}
+
+- ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
   - template: pipes/function-only-pipe.yml
     parameters:
       variableGroupName: 'DurableDemo'
       environments: ['DEV','QA']
-      runDevSecOpsScan: ${{ parameters.runDevSecOpsScan }}
-      runGHAzDOScan: ${{ parameters.runGHAzDOScan }}
-      workingDirectoryCode: 'src/Durable.Demo'
-      workingDirectoryInfra: '/infra/bicep'
+      appFolderName: 'src/Durable.Demo'
+      appSolutionName: 'Durable.Demo'
+      appProjectFolderName: 'src/Durable.Demo'
+      runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+      runGHASScan: ${{ parameters.runGHASScan }}

@@ -2,8 +2,6 @@
 # Template to deploy a pre-built Azure Function artifact to one environment
 # ----------------------------------------------------------------------------------------------------
 parameters: 
-- name: variableGroupName
-  default:  'myVariableGroup'
 - name: environmentName
   default:  'DEV'
 - name: pipelineResourceIdentifier # supplied if this is deployed with artifacts from another pipeline
@@ -18,13 +16,12 @@ jobs:
 - job: Deploy${{ parameters.environmentName }}Function
   displayName: Deploy ${{ parameters.environmentName }} Function
   variables:
-    - group: ${{ parameters.variableGroupName }}
     - name: environmentName
       value: ${{ parameters.environmentName }}
     - name: pipelineResourcePath
-      value: '$(Pipeline.Workspace)\${{ parameters.pipelineResourceIdentifier }}'
+      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}'
     - name: pipelineResourceDropPath
-      value: '$(Pipeline.Workspace)\${{ parameters.pipelineResourceIdentifier }}\drop'
+      value: '$(Pipeline.Workspace)/${{ parameters.pipelineResourceIdentifier }}/drop'
 
   steps:
   - bash: |
@@ -69,7 +66,7 @@ jobs:
           echo "requestedFor: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedFor)"
           echo "requestedForID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedForID)"
           echo "Directory of $(pipelineResourcePath):"
-          dir $(pipelineResourcePath) /s
+          tree -L 3 $(Build.SourcesDirectory)
       displayName: 'Display Artifact Info'
       continueOnError: true
 
@@ -91,8 +88,7 @@ jobs:
         echo "environmentName=$(environmentName)"
         echo "functionAppName=$(functionAppName)"
         echo "Directory of pipeline workspace:"
-        tree $(Pipeline.Workspace)
-        dir $(Pipeline.Workspace) /s
+        tree -L 3 $(Pipeline.Workspace)
     displayName: 'Display Variables and Tree'
     continueOnError: true
 

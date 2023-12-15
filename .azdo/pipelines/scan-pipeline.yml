@@ -1,37 +1,27 @@
 # ------------------------------------------------------------------------------------------------------------------------
-# Pipeline to deploy Azure Resources Only
-# See readme file for info about variable group "DurableDemo"
+# Pipeline to Run Security Scan
 # ------------------------------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
   vmImage: ubuntu-latest
-variables:
-  - group: DurableDemo
 
 # ------------------------------------------------------------------------------------------------------------------------
 trigger:
-  # since this repo has both AzDO and GHA pipelines, nothing is run automatically...
-  - none
-  # batch: true
-  # branches:
-  #   include:
-  #     - main
-  # paths:
-  #   include: 
-  #     - '**/*.yml'
-  #     - '**/*.yaml'
-  #     - '**/*.bicep'
+ - none
+
+schedules:
+- cron: '0 12 * * 3'
+  displayName: Scan Every Wednesday
+  branches:
+    include:
+    - main
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
-  - name: deployMultiStage
-    displayName: Multi-Stage Deploy
-    type: boolean
-    default: false
   - name: runGHASScan
     displayName: Run GHAS Scan
     type: boolean
-    default: false
+    default: true
   - name: runMSDevSecOpsScan
     displayName: Run MS DevSecOps Scan
     type: boolean
@@ -39,22 +29,15 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
-  - template: pipes/infra-only-pipe.yml
+- stage: ScanApplication
+  displayName: Scan Application
+  jobs:
+  - template: pipes/templates/scan-code-template.yml
     parameters:
-      environments: ['DEMO']
+      environmentName: 'DEMO'
       appFolderName: 'src/Durable.Demo'
       appSolutionName: 'Durable.Demo'
       appProjectFolderName: 'src/Durable.Demo'
-      runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+      appProjectExtension: 'csproj'
       runGHASScan: ${{ parameters.runGHASScan }}
-
-- ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
-  - template: pipes/infra-only-pipe.yml
-    parameters:
-      environments: ['DEV','QA']
-      appFolderName: 'src/Durable.Demo'
-      appSolutionName: 'Durable.Demo'
-      appProjectFolderName: 'src/Durable.Demo'
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
-      runGHASScan: ${{ parameters.runGHASScan }}

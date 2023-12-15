@@ -4,10 +4,10 @@
 
 Typically, you would want to set up the either first option or the second and third option, but not all three jobs.
 
-- **infra-and-code-pipeline.yml:** Deploys the main.bicep template, builds the function app, then deploys the function app to the Azure Function
+- **infra-and-function-pipeline.yml:** Deploys the main.bicep template, builds the function app, then deploys the function app to the Azure Function
 - **infra-only-pipeline.yml:** Deploys the main.bicep template and does nothing else
-- **app-only-pipeline.yml:** Builds the function app and then deploys the function app to the Azure Function
-- **test-harness-build-pipeline.yml:** Builds the console utility that can be used to test the app and then copies the EXE file to a storage account for easy access.
+- **function-only-pipeline.yml:** Builds the function app and then deploys the function app to the Azure Function
+- **console-app-pipeline.yml:** Builds the console utility that can be used to test the app and then copies the EXE file to a storage account for easy access.
 
 ---
 
@@ -45,9 +45,7 @@ This example sends a text message so you will want to have a Twilio account set 
      --project='<yourAzDOProject>' 
      --name DurableDemo 
      --variables 
-         orgName='<yourInitials>-durabledemo' 
-         appSuffix=''
-         environmentCode='dev' 
+         appName='<yourInitials>-durablea' 
          serviceConnectionName='<yourServiceConnection>' 
          azureSubscription='<yourAzureSubscriptionName>' 
          subscriptionId='<yourSubscriptionId>' 
@@ -56,6 +54,7 @@ This example sends a text message so you will want to have a Twilio account set 
          functionAppSku='Y1' 
          functionAppSkuFamily='Y' 
          functionAppSkuTier='Dynamic' 
+         resourceGroupPrefix='rg_durable_function'
          keyVaultOwnerUserId='owner1SID'
          twilioAccountSid='<twilioAccountSid>'
          twilioAuthToken='<twilioAuthToken>'

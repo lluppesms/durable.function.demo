@@ -14,9 +14,9 @@
 
 1. [Deploy using AZD Command Line Tool](./Docs/AzdDeploy.md)
 
-2. [Deploy using Azure DevOps](./Docs/AzureDevOps.md)
+2. [Deploy using Azure DevOps](./.azdo/readme.md)
 
-3. [Deploy using GitHub Actions](./Docs/GitHubActions.md)
+3. [Deploy using GitHub Actions](./.github/readme.md)
 
 ---
 
