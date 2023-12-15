@@ -7,6 +7,8 @@ Typically, you would want to set up the either first option or the second and th
 - **infra-and-function-pipeline.yml:** Deploys the main.bicep template, builds the function app, then deploys the function app to the Azure Function
 - **infra-only-pipeline.yml:** Deploys the main.bicep template and does nothing else
 - **function-only-pipeline.yml:** Builds the function app and then deploys the function app to the Azure Function
+- **deploy-only-pipeline.yml:** Deploys a PREVIOUSLY BUILT function app to the Azure Function
+- **build-pr-pipeline.yml:** Scans the folders and builds the function app whenever a PR is created
 - **console-app-pipeline.yml:** Builds the console utility that can be used to test the app and then copies the EXE file to a storage account for easy access.
 
 ---

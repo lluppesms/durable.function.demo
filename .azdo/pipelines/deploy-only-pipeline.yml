@@ -4,6 +4,11 @@
 # ----------------------------------------------------------------------------------------------------
 # NOTE: This pipeline assumes that the artifact has already been created by a previous pipeline
 # ----------------------------------------------------------------------------------------------------
+# WARNING: You will probably want to put some more gates in here around a PROD deploy!!!
+#          This sample will let you deploy whatever you choose to any environment...
+#          The environment approval process should filter that some, but you may want more
+#          like a check to see if the build came from the "Release" branch or something like that.
+# ----------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
   vmImage: ubuntu-latest
@@ -12,20 +17,7 @@ variables:
 
 # ----------------------------------------------------------------------------------------------------
 trigger:
-  # since this repo has both AzDO and GHA pipelines, nothing is run automatically...
   - none
-  # batch: true
-  # branches:
-  #   include:
-  #     - main
-  # paths:
-  #   include:
-  #     - FunctionApp
-  #   exclude: 
-  #     - '**/*.yml'
-  #     - '**/*.yaml'
-  #     - '**/*.bicep'
-  #     - '**/*.md'
 
 # ----------------------------------------------------------------------------------------------------
 resources:
@@ -36,21 +28,40 @@ resources:
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
-  - name: deployMultiStage
-    displayName: Multi-Stage Deploy
-    type: boolean
-    default: false
+  - name: deployToEnvironment
+    displayName: Environment
+    type: string
+    values:
+      - DEMO
+      - DEV
+      - QA
+      - PROD
+    default: DEV
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
-  - template: pipes/deploy-only-pipe.yml
-    parameters:
-      environments: ['DEMO']
-      pipelineResourceIdentifier: 'durable.function-only'
+- template: pipes/deploy-only-pipe.yml
+  parameters:
+    environments: [ '${{ parameters.deployToEnvironment }}' ]
+    pipelineResourceIdentifier: 'durable.function-only'
 
-- ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
-  - template: pipes/deploy-only-pipe.yml
-    parameters:
-      environments: ['DEV','QA']
-      pipelineResourceIdentifier: 'durable.function-only'
+# ----------------------------------------------------------------------------------------------------
+# A slightly different version that lets you deploy to multiple stages at once...
+# ----------------------------------------------------------------------------------------------------
+# parameters:
+#   - name: deployMultiStage
+#     displayName: Multi-Stage Deploy
+#     type: boolean
+#     default: false
+# # ----------------------------------------------------------------------------------------------------
+# stages:
+# - ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
+#   - template: pipes/deploy-only-pipe.yml
+#     parameters:
+#       environments: ['DEMO']
+#       pipelineResourceIdentifier: 'durable.function-only'
+# - ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
+#   - template: pipes/deploy-only-pipe.yml
+#     parameters:
+#       environments: ['DEV','QA']
+#       pipelineResourceIdentifier: 'durable.function-only'
