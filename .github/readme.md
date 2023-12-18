@@ -1,25 +1,9 @@
-# Azure Durable Functions Demo
+# GitHub Actions Deploy
 
-[![Open in vscode.dev](https://img.shields.io/badge/Open%20in-vscode.dev-blue)][1]
+This project has GitHub Actions workflows that will build and deploy the application. The workflows are defined in the `.github/workflows` folder.
 
-[1]: https://vscode.dev/github/lluppesms/durable.function.demo/
+## Steps to Deploy App to Azure
 
-![azd Compatible](/Docs/images/AZD_Compatible.png)
-
-[![deploy.infra.and.function](https://github.com/lluppesms/durable.function.demo/actions/workflows/deploy-infra-function.yml/badge.svg)](https://github.com/lluppesms/durable.function.demo/actions/workflows/deploy-infra-function.yml)
-
----
-
-## Deployment Options
-
-1. [Deploy using AZD Command Line Tool](/Docs/AzdDeploy.md)
-
-2. [Deploy using Azure DevOps](/Docs/AzureDevOps.md)
-
-3. [Deploy using GitHub Actions](/Docs/GitHubActions.md)
-
----
-
-## Running the Application
-
-[How to run the application](./Docs/RunApplication.md)
+- [Create Repository Secrets](/.github/CreateGitHubSecrets.md)
+- Trigger the workflow "deploy.infra" in GitHub to deploy the infrastructure
+- Trigger the workflow "deploy.app" in GitHub to deploy the app
