@@ -16,7 +16,7 @@
 
 2. [Deploy using Azure DevOps](./.azdo/readme.md)
 
-3. [Deploy using GitHub Actions](./.github/readme.md)
+3. [Deploy using GitHub Actions](./.github/workflows-readme.md)
 
 ---
 
