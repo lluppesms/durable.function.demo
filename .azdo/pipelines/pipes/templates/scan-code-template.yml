@@ -137,7 +137,7 @@ jobs:
         echo "continueAfterScanErrors=$(continueAfterScanErrors)"
         echo "parameters.continueOnScanError=${{parameters.continueOnScanError}}"
         echo "Directory Listing for $(Pipeline.Workspace)"
-        tree -L 3 $(Pipeline.Workspace)
+        tree -L 4 $(Pipeline.Workspace)
       displayName: 'Display Variables'
       continueOnError: true
 
