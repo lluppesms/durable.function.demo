@@ -24,10 +24,16 @@ trigger:
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
-  - name: deployMultiStage
-    displayName: Multi-Stage Deploy
-    type: boolean
-    default: false
+  - name: deployToEnvironment
+    displayName: Deploy To
+    type: string
+    values:
+      - DEMO
+      - DEV
+      - QA
+      - PROD
+      - MULTIPLE
+    default: DEMO
   - name: runGHASScan
     displayName: Run GHAS Scan
     type: boolean
@@ -39,22 +45,16 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
+- ${{ if ne(parameters.deployToEnvironment, 'MULTIPLE') }}:
   - template: pipes/infra-and-function-pipe.yml
     parameters:
-      environments: ['DEMO']
-      appFolderName: 'src/Durable.Demo'
-      appSolutionName: 'Durable.Demo'
-      appProjectFolderName: 'src/Durable.Demo'
+      environments: ['${{ parameters.deployToEnvironment }}']
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}
 
-- ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
+- ${{ if eq(parameters.deployToEnvironment, 'MULTIPLE') }}:
   - template: pipes/infra-and-function-pipe.yml
     parameters:
-      environments: ['DEV','QA']
-      appFolderName: 'src/Durable.Demo'
-      appSolutionName: 'Durable.Demo'
-      appProjectFolderName: 'src/Durable.Demo'
+      environments: ['DEV','PROD']
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}

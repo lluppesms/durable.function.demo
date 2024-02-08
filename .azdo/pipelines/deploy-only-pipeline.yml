@@ -22,46 +22,33 @@ trigger:
 # ----------------------------------------------------------------------------------------------------
 resources:
   pipelines:
-  - pipeline: durable.function-only # internal identifier for the resource
-    source: durable.function-only   # name of the pipeline that produces an artifact
+  - pipeline: durable.function.only # internal identifier for the resource
+    source: durable.function.only   # name of the pipeline that produces an artifact
     branch: main                    # should only allow builds from the main branch to be used
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
   - name: deployToEnvironment
-    displayName: Environment
+    displayName: Deploy To
     type: string
     values:
       - DEMO
       - DEV
       - QA
       - PROD
+      - MULTIPLE
     default: DEV
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- template: pipes/deploy-only-pipe.yml
-  parameters:
-    environments: [ '${{ parameters.deployToEnvironment }}' ]
-    pipelineResourceIdentifier: 'durable.function-only'
+- ${{ if ne(parameters.deployToEnvironment, 'MULTIPLE') }}:
+  - template: pipes/deploy-only-pipe.yml
+    parameters:
+      environments: [ '${{ parameters.deployToEnvironment }}' ]
+      pipelineResourceIdentifier: 'durable.function.only'
 
-# ----------------------------------------------------------------------------------------------------
-# A slightly different version that lets you deploy to multiple stages at once...
-# ----------------------------------------------------------------------------------------------------
-# parameters:
-#   - name: deployMultiStage
-#     displayName: Multi-Stage Deploy
-#     type: boolean
-#     default: false
-# # ----------------------------------------------------------------------------------------------------
-# stages:
-# - ${{ if eq(lower(parameters.deployMultiStage), 'false') }}:
-#   - template: pipes/deploy-only-pipe.yml
-#     parameters:
-#       environments: ['DEMO']
-#       pipelineResourceIdentifier: 'durable.function-only'
-# - ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
-#   - template: pipes/deploy-only-pipe.yml
-#     parameters:
-#       environments: ['DEV','QA']
-#       pipelineResourceIdentifier: 'durable.function-only'
+- ${{ if eq(parameters.deployToEnvironment, 'MULTIPLE') }}:
+  - template: pipes/deploy-only-pipe.yml
+    parameters:
+      environments: ['DEV','PROD']
+      pipelineResourceIdentifier: 'durable.function.only'

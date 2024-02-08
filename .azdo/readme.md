@@ -2,7 +2,7 @@
 
 ## 1. Azure DevOps Template Definitions
 
-Typically, you would want to set up the either first option or the second and third option, but not all three jobs.
+Typically, you would want to set up either the first option or the second and third option, but not all three jobs.
 
 - **infra-and-function-pipeline.yml:** Deploys the main.bicep template, builds the function app, then deploys the function app to the Azure Function
 - **infra-only-pipeline.yml:** Deploys the main.bicep template and does nothing else

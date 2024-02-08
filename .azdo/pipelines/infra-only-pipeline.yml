@@ -43,18 +43,12 @@ stages:
   - template: pipes/infra-only-pipe.yml
     parameters:
       environments: ['DEMO']
-      appFolderName: 'src/Durable.Demo'
-      appSolutionName: 'Durable.Demo'
-      appProjectFolderName: 'src/Durable.Demo'
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}
 
 - ${{ if eq(lower(parameters.deployMultiStage), 'true') }}:
   - template: pipes/infra-only-pipe.yml
     parameters:
-      environments: ['DEV','QA']
-      appFolderName: 'src/Durable.Demo'
-      appSolutionName: 'Durable.Demo'
-      appProjectFolderName: 'src/Durable.Demo'
+      environments: ['DEV','PROD']
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}

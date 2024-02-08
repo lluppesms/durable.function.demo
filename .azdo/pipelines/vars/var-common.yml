@@ -2,5 +2,39 @@
 # Variables common to all environments
 # ----------------------------------------------------------------------------------------------------
 variables:
-  - name: applicationCommonName
-    value: 'Durable Functions Demo'
+  # - name: appName
+  #   value: 'this is unique to you - define in a variable group or on the pipeline variables!'
+  # - name: serviceConnectionName
+  #   value: 'this is unique to you - define in a variable group or on the pipeline variables!'
+
+  - name: resourceGroupPrefix
+    value: 'rg_durable_func'
+  - name: applicationTitle
+    value: 'Net6 Durable Functions Demo'
+  - name: location
+    value: 'eastus'
+
+  - name: functionAppSku
+    value: 'Y1'
+  - name: functionAppSkuFamily
+    value: 'Y'
+  - name: functionAppSkuTier
+    value: 'Dynamic'
+  - name: functionKind
+    value: 'functionapp,linux'
+  - name: storageSku 
+    value: 'Standard_LRS'
+
+  - name: appFolderName
+    value: 'src/Durable.Demo'
+  - name: appSolutionName
+    value: 'Durable.Demo'
+  - name: appProjectFolderName
+    value: 'src/Durable.Demo'
+  - name: appProjectExtension
+    value: 'csproj'
+
+  - name: workingDirectoryInfra
+    value: '/infra/bicep'
+  - name: workingDirectoryIgnore
+    value: '/Docs'

@@ -11,10 +11,6 @@ param dataStorageNameSuffix string = 'data'
 // --------------------------------------------------------------------------------
 // pull resource abbreviations from a common JSON file
 var resourceAbbreviations = loadJsonContent('./resourceAbbreviations.json')
-// -- experiment to create these constants in a bicep file instead of a JSON file - not fully tested, but it looks like it would work...
-// module resourceAbbreviationTest 'resourceAbbreviationTest.bicep' = {
-//   name: 'resourceAbbreviationTest'
-// }
 
 // --------------------------------------------------------------------------------
 var lowerAppName = replace(toLower(appName), ' ', '')
