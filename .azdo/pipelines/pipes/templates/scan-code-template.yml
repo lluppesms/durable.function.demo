@@ -91,13 +91,13 @@ jobs:
       displayName: 'Restore project'
       inputs:
         command: 'restore'
-        projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$$(appProjectExtension)'
+        projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$(appProjectExtension)'
 
     - ${{ if eq(lower(variables.appProjectExtension), 'csproj') }}:
       - task: DotNetCoreCLI@2
         displayName: Build CS Project
         inputs:
-          projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$$(appProjectExtension)'
+          projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$(appProjectExtension)'
           arguments: '--output publish_output --configuration Release'
 
     - ${{ if eq(lower(variables.appProjectExtension), 'sqlproj') }}:
