@@ -46,9 +46,9 @@ jobs:
       - name: environmentName
         value: ${{ parameters.environmentName }}
       - name: solutionPathName
-        value: '$(parameters.projectPath)$(parameters.folderName)/$(parameters.solutionName)'
+        value: '$(projectPath)$(folderName)/$(solutionName)'
       - name: projectPathName
-        value: '$(parameters.projectPath)$(parameters.folderName)/$(parameters.projectName)'
+        value: '$(projectPath)$(folderName)/$(projectName)'
 
     steps:
     - task: CmdLine@2
