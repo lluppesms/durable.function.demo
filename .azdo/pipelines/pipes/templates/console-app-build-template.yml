@@ -25,42 +25,30 @@
 parameters:
 - name: environmentName
   default:  'DEV'
-- name: projectPath
-  default: 'src/'
-- name: folderName
-  default: 'myFolderName'
-- name: solutionName
-  default: 'mySolutionName.sln'
-- name: projectName
-  default: 'myProjectName.csproj'
-- name: exeName
-  default: 'myExeName'
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
   - job: Build
     variables:
       - group: CodeSigning
-      - name: buildPlatform
-        value: 'Any CPU'
-      - name: buildConfiguration
-        value: 'Release'
+      # Bring in environment common variable file
+      - template: ../../vars/var-common.yml
+      - template: ../../vars/var-source-location-console.yml
+      # Bring in environment specific variable files
+      - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+        - template: ../../vars/var-demo.yml
+      - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+        - template: ../../vars/var-dev.yml
+      - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+        - template: ../../vars/var-qa.yml
+      - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+        - template: ../../vars/var-prod.yml
       - name: environmentName
         value: ${{ parameters.environmentName }}
-      - name: projectPath
-        value: ${{ parameters.projectPath }}
-      - name: solutionName
-        value: ${{ parameters.solutionName }}
-      - name: projectName
-        value: ${{ parameters.projectName }}
       - name: solutionPathName
-        value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.solutionName }}'
+        value: '$(parameters.projectPath)$(parameters.folderName)/$(parameters.solutionName)'
       - name: projectPathName
-        value: '${{ parameters.projectPath }}${{ parameters.folderName }}/${{ parameters.projectName }}'
-      - name: exeName
-        value: ${{ parameters.exeName }}
-      - name: folderName
-        value: ${{ parameters.folderName }}
+        value: '$(parameters.projectPath)$(parameters.folderName)/$(parameters.projectName)'
 
     steps:
     - task: CmdLine@2

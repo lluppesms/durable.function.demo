@@ -4,8 +4,6 @@
 parameters: 
 - name: environmentName
   default:  'DEV'
-- name: appFolderName
-  default: '/src/myProject'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
@@ -16,20 +14,34 @@ jobs:
 - job: Build${{ parameters.environmentName }}Function
   displayName: Build ${{ parameters.environmentName }} Function
   
+  variables:
+    # Bring in environment common variable file
+    - template: ../../vars/var-common.yml
+    - template: ../../vars/var-source-location-app.yml
+    # Bring in environment specific variable files
+    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+      - template: ../../vars/var-demo.yml
+    - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+      - template: ../../vars/var-dev.yml
+    - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+      - template: ../../vars/var-qa.yml
+    - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+      - template: ../../vars/var-prod.yml
+
   steps:
   - bash: |
       echo "Build.ArtifactStagingDirectory=$(Build.ArtifactStagingDirectory)"
       echo "System.DefaultWorkingDirectory=$(System.DefaultWorkingDirectory)"
       echo "Build.BuildId=$(Build.BuildId)"
       echo "appName=$(appName)"
-      echo "parameters.appFolderName=${{ parameters.appFolderName }}"
+      echo "appFolderName=$(appFolderName)"
     continueOnError: true
     displayName: 'Display Variables'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build project'
     inputs:
-      projects: '${{ parameters.appFolderName }}/*.csproj'
+      projects: '$(appFolderName)/*.csproj'
       arguments: '--output publish_output --configuration Release'
 
   - task: ArchiveFiles@2

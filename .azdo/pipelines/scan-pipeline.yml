@@ -18,6 +18,14 @@ schedules:
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
+  - name: sourceToScan
+    displayName: Source to Scan
+    type: string
+    values:
+      - FUNCTION
+      - TESTER
+      - BOTH
+    default: FUNCTION
   - name: runGHASScan
     displayName: Run GHAS Scan
     type: boolean
@@ -29,11 +37,24 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- stage: ScanApplication
-  displayName: Scan Application
-  jobs:
-  - template: pipes/templates/scan-code-template.yml
-    parameters:
-      environmentName: 'DEMO'
-      runGHASScan: ${{ parameters.runGHASScan }}
-      runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+- ${{ if or(eq(parameters.sourceToScan, 'FUNCTION'), eq(parameters.sourceToScan, 'BOTH')) }}:
+  - stage: ScanApplication
+    displayName: Scan Application
+    jobs:
+    - template: pipes/templates/scan-code-template.yml
+      parameters:
+        environmentName: 'DEMO'
+        runGHASScan: ${{ parameters.runGHASScan }}
+        runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+        codeSection: 'app'
+
+- ${{ if or(eq(parameters.sourceToScan, 'TESTER'), eq(parameters.sourceToScan, 'BOTH')) }}:
+  - stage: ScanApplicationTester
+    displayName: Scan Application Tester
+    jobs:
+    - template: pipes/templates/scan-code-template.yml
+      parameters:
+        environmentName: 'DEMO'
+        runGHASScan: ${{ parameters.runGHASScan }}
+        runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+        codeSection: 'console'

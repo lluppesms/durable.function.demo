@@ -18,6 +18,18 @@ jobs:
 - job: CreateInfraJob
   displayName: Create Infrastructure
   variables:
+    # Bring in environment common variable file
+    - template: ../../vars/var-common.yml
+    - template: ../../vars/var-source-location-console.yml
+    # Bring in environment specific variable files
+    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+      - template: ../../vars/var-demo.yml
+    - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+      - template: ../../vars/var-dev.yml
+    - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+      - template: ../../vars/var-qa.yml
+    - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+      - template: ../../vars/var-prod.yml
     - name: environmentNameUpper
       value: ${{ upper(parameters.environmentName) }}
     - name: environmentNameLower

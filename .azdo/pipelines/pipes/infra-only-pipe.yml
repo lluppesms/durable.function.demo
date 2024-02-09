@@ -9,16 +9,6 @@ parameters:
   default: 'false'
 - name: runMSDevSecOpsScan
   default: 'false'
-- name: appFolderName
-  default: ''
-- name: appSolutionName
-  default: ''
-- name: appProjectFolderName
-  default: ''
-- name: appProjectName
-  default: ''
-- name: appProjectExtension
-  default: 'csproj'
 
 # ----------------------------------------------------------------------------------------------------
 stages:
@@ -31,11 +21,8 @@ stages:
         environmentName: 'DEMO'
         runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
         runGHASScan: ${{ parameters.runGHASScan }}
-        appFolderName: ${{ parameters.appFolderName }}
-        appSolutionName: ${{ parameters.appSolutionName }}
-        appProjectFolderName: ${{ parameters.appProjectFolderName }}
-        appProjectExtension: ${{ parameters.appProjectExtension }}
 
+# ----------------------------------------------------------------------------------------------------
 - ${{ each environmentName in parameters.environments }} :
   - stage: CreateInfra${{ environmentName }}
     displayName: Create ${{ environmentName }} Resources

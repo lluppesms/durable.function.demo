@@ -12,7 +12,7 @@ parameters:
 stages:
 - ${{ each environmentName in parameters.environments }} :
   - stage: DeployApp${{ environmentName }}
-    displayName: Deploy ${{ environmentName }} Application
+    displayName: Deploy ${{ environmentName }} App
     jobs:
     - template: templates/deploy-function-template.yml
       parameters:

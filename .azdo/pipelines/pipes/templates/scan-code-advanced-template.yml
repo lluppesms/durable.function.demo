@@ -35,26 +35,44 @@ parameters:
   default: 'false'
 - name: runMSDevSecOpsScan
   default: 'false'
-- name: appFolderName
-  default: ''
-- name: appSolutionName
-  default: ''
-- name: appProjectFolderName
-  default: '/src/DirWhereProjLives'
-- name: appProjectExtension
-  default: 'csproj'
-- name: workingDirectoryInfra
-  default: '/infra/bicep'
-- name: workingDirectoryIgnore
-  default: '/Docs'
-- name: continueOnScanError
-  default: 'true'
+- name: codeSection
+  default: 'app'
+# - name: appFolderName
+#   default: ''
+# - name: appSolutionName
+#   default: ''
+# - name: appProjectFolderName
+#   default: '/src/DirWhereProjLives'
+# - name: appProjectExtension
+#   default: 'csproj'
+# - name: workingDirectoryInfra
+#   default: '/infra/bicep'
+# - name: workingDirectoryIgnore
+#   default: '/Docs'
+# - name: continueOnScanError
+#   default: 'true'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
 - deployment: CodeScanDeployment
   displayName: Initialize Code Scans
   environment: ${{ parameters.environmentName }}
+  variables:
+    # Bring in environment common variable file
+    - template: ../../vars/var-common.yml
+    - ${{ if eq(lower(parameters.codeSection), 'app') }}:
+      - template: ../../vars/var-source-location-app.yml
+    - ${{ if eq(lower(parameters.codeSection), 'console') }}:
+      - template: ../../vars/var-source-location-console.yml
+    # Bring in environment specific variable files
+    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+      - template: ../../vars/var-demo.yml
+    - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+      - template: ../../vars/var-dev.yml
+    - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+      - template: ../../vars/var-qa.yml
+    - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+      - template: ../../vars/var-prod.yml
 
 # ----------------------------------------------------------------------------------------------------
 # GHAzDO Scanner

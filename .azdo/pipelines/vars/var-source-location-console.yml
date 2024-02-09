@@ -1,0 +1,16 @@
+# ----------------------------------------------------------------------------------------------------
+# Variables for location of source for console app
+# ----------------------------------------------------------------------------------------------------
+variables:
+  - name: appFolderName
+    value: 'src/Durable.Tester'
+  - name: appSolutionName
+    value: 'Durable.Tester'
+  - name: appProjectFolderName
+    value: 'src/Durable.Tester'
+  - name: appProjectExtension
+    value: 'csproj'
+  - name: buildPlatform
+    value: 'Any CPU'
+  - name: buildConfiguration
+    value: 'Release'

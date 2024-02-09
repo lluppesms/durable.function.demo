@@ -6,25 +6,16 @@ parameters:
   default: 'None'
 - name: runGHASScan
   default: 'false'
-- name: workingDirectoryCode
-  default: 'src/myproject'
-- name: workingDirectoryInfra
-  default: '/infra/bicep'
-- name: workingDirectoryIgnore
-  default: '/docs'
-- name: continueOnScanError
-  default: 'true'
+- name: codeSection
+  default: 'app'
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- stage: ScanApplication
-  displayName: Scan Application
+- stage: ScanApplication${{parameters.codeSection}}
+  displayName: Scan ${{parameters.codeSection}}
   jobs:
   - template: templates/scan-code-template.yml
     parameters:
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}
-      workingDirectoryCode: ${{ parameters.workingDirectoryCode }}
-      workingDirectoryInfra: ${{ parameters.workingDirectoryInfra }}
-      workingDirectoryIgnore: ${{ parameters.workingDirectoryIgnore }}
-      #continueOnScanError: ${{ parameters.continueOnScanError }}
+      codeSection: ${{ parameters.codeSection }}

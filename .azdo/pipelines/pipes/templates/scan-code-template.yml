@@ -15,31 +15,38 @@ parameters:
   default: 'false'
 - name: runMSDevSecOpsScan
   default: 'false'
-- name: appFolderName
-  default: ''
-- name: appSolutionName
-  default: ''
-- name: appProjectFolderName
-  default: '/src/DirWhereProjLives'
-- name: appProjectExtension
-  default: 'csproj'
-- name: workingDirectoryInfra
-  default: '/infra/bicep'
-- name: workingDirectoryIgnore
-  default: '/Docs'
 - name: continueOnScanError
   default: 'true'
+- name: codeSection
+  default: 'app'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
-- deployment: CodeScanDeployment
-  displayName: Initialize Code Scans
+- deployment: CodeScanDeployment${{parameters.codeSection}}
+  displayName: Initialize Code Scans ${{parameters.codeSection}}
   environment: ${{ parameters.environmentName }}
+
+  variables:
+    # Bring in environment common variable file
+    - template: ../../vars/var-common.yml
+    - ${{ if eq(lower(parameters.codeSection), 'app') }}:
+      - template: ../../vars/var-source-location-app.yml
+    - ${{ if eq(lower(parameters.codeSection), 'console') }}:
+      - template: ../../vars/var-source-location-console.yml
+    # Bring in environment specific variable files
+    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+      - template: ../../vars/var-demo.yml
+    - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+      - template: ../../vars/var-dev.yml
+    - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+      - template: ../../vars/var-qa.yml
+    - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+      - template: ../../vars/var-prod.yml
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ if eq(lower(parameters.runGHASScan), 'true') }}:
-  - job: GHASScanJob
-    displayName: GHAS Scan Job
+  - job: GHASScanJob${{parameters.codeSection}}
+    displayName: GHAS Scan Job ${{parameters.codeSection}}
     steps:
     # Very basic simple example that might work sometimes...
     # - task: AdvancedSecurity-Codeql-Init@1
@@ -57,14 +64,14 @@ jobs:
       inputs:
         script: |
           echo "parameters.continueOnScanError=${{ parameters.continueOnScanError }}"
-          echo "parameters.appProjectFolderName=${{ parameters.appProjectFolderName }}"
-          echo "parameters.workingDirectoryInfra=${{ parameters.workingDirectoryInfra }}"
-          echo "parameters.workingDirectoryIgnore=${{ parameters.workingDirectoryIgnore }}"
-          echo "Project Path: $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}/*.{{ parameters.appProjectExtension }}"
+          echo "appProjectFolderName=$(appProjectFolderName)"
+          echo "workingDirectoryInfra=$(workingDirectoryInfra)"
+          echo "workingDirectoryIgnore=$(workingDirectoryIgnore)"
+          echo "Project Path: $(Build.SourcesDirectory)/$(appProjectFolderName)/*.$(appProjectExtension)"
           echo "Build.SourcesDirectory=$(Build.SourcesDirectory)"
           echo "------------------------------------------------"
-          echo "Directory of Project Files: $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}"
-          tree L -3 $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}
+          echo "Directory of Project Files: $(Build.SourcesDirectory)/$(appProjectFolderName)"
+          tree L -3 $(Build.SourcesDirectory)/$(appProjectFolderName)
           echo "------------------------------------------------"
           echo "Directory of Full Staging Directory: $(Build.SourcesDirectory)"
           tree -L 3 $(Build.SourcesDirectory)
@@ -76,28 +83,28 @@ jobs:
       inputs:
         languages: 'csharp'
         querysuite: security-extended
-      #   sourcesfolder: ${{ parameters.appProjectFolderName }}
-      #   codeqlpathstoinclude: ${{ parameters.appProjectFolderName }}
-      #   codeqlpathstoignore: ${{ parameters.workingDirectoryIgnore }}
+      #   sourcesfolder: $(appProjectFolderName)
+      #   codeqlpathstoinclude: $(appProjectFolderName)
+      #   codeqlpathstoignore: $(workingDirectoryIgnore)
 
     - task: DotNetCoreCLI@2
       displayName: 'Restore project'
       inputs:
         command: 'restore'
-        projects: '$(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}/*.${{ parameters.appProjectExtension }}'
+        projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$$(appProjectExtension)'
 
     - ${{ if eq(lower(parameters.appProjectExtension), 'csproj') }}:
       - task: DotNetCoreCLI@2
         displayName: Build CS Project
         inputs:
-          projects: '$(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}/*.${{ parameters.appProjectExtension }}'
+          projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$$(appProjectExtension)'
           arguments: '--output publish_output --configuration Release'
 
     - ${{ if eq(lower(parameters.appProjectExtension), 'sqlproj') }}:
       - task: VSBuild@1
         displayName: Build DacPac Project
         inputs:
-          solution: '${{ parameters.appFolderName }}/${{ parameters.appSolutionName }}.sln'
+          solution: '$(appFolderName)/$(appSolutionName).sln'
           platform: 'Any CPU'
           configuration: 'Release'
 
@@ -126,16 +133,16 @@ jobs:
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ if eq(lower(parameters.runMSDevSecOpsScan), 'true') }}:
-  - job: DevSecOpsScanJob
-    displayName: DevSecOps Scan Job
+  - job: DevSecOpsScanJob${{parameters.codeSection}}
+    displayName: DevSecOps Scan Job ${{parameters.codeSection}}
     steps:
     - bash: |
         echo "parameters.runMSDevSecOpsScan=${{parameters.runMSDevSecOpsScan}}"
-        echo "parameters.appProjectFolderName=${{parameters.appProjectFolderName}}"
-        echo "parameters.workingDirectoryInfra=${{parameters.workingDirectoryInfra}}"
-        echo "parameters.workingDirectoryIgnore=${{parameters.workingDirectoryIgnore}}"
-        echo "continueAfterScanErrors=$(continueAfterScanErrors)"
         echo "parameters.continueOnScanError=${{parameters.continueOnScanError}}"
+        echo "appProjectFolderName=$(appProjectFolderName)"
+        echo "workingDirectoryInfra=$(workingDirectoryInfra)"
+        echo "workingDirectoryIgnore=$(workingDirectoryIgnore)"
+        echo "continueAfterScanErrors=$(continueAfterScanErrors)"
         echo "Directory Listing for $(Pipeline.Workspace)"
         tree -L 4 $(Pipeline.Workspace)
       displayName: 'Display Variables'
