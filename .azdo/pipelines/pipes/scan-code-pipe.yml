@@ -11,11 +11,12 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- stage: ScanApplication${{parameters.codeSection}}
+- stage: Scan${{parameters.codeSection}}
   displayName: Scan ${{parameters.codeSection}}
   jobs:
   - template: templates/scan-code-template.yml
     parameters:
+      environmentName: 'DEV'
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}
       codeSection: ${{ parameters.codeSection }}

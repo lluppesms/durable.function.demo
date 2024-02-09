@@ -71,10 +71,10 @@ jobs:
           echo "Build.SourcesDirectory=$(Build.SourcesDirectory)"
           echo "------------------------------------------------"
           echo "Directory of Project Files: $(Build.SourcesDirectory)/$(appProjectFolderName)"
-          tree L -3 $(Build.SourcesDirectory)/$(appProjectFolderName)
+          tree -L 4 $(Build.SourcesDirectory)/$(appProjectFolderName)
           echo "------------------------------------------------"
           echo "Directory of Full Staging Directory: $(Build.SourcesDirectory)"
-          tree -L 3 $(Build.SourcesDirectory)
+          tree -L 4 $(Build.SourcesDirectory)
       displayName: 'Display Variables and Tree'
       continueOnError: true
 

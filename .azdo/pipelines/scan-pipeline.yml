@@ -38,23 +38,15 @@ parameters:
 # ----------------------------------------------------------------------------------------------------
 stages:
 - ${{ if or(eq(parameters.sourceToScan, 'FUNCTION'), eq(parameters.sourceToScan, 'BOTH')) }}:
-  - stage: ScanApplication
-    displayName: Scan Application
-    jobs:
-    - template: pipes/templates/scan-code-template.yml
-      parameters:
-        environmentName: 'DEMO'
-        runGHASScan: ${{ parameters.runGHASScan }}
-        runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
-        codeSection: 'app'
+  - template: pipes/scan-code-pipe.yml
+    parameters:
+      runGHASScan: ${{ parameters.runGHASScan }}
+      runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+      codeSection: 'app'
 
 - ${{ if or(eq(parameters.sourceToScan, 'TESTER'), eq(parameters.sourceToScan, 'BOTH')) }}:
-  - stage: ScanTester
-    displayName: Scan Tester
-    jobs:
-    - template: pipes/templates/scan-code-template.yml
-      parameters:
-        environmentName: 'DEMO'
-        runGHASScan: ${{ parameters.runGHASScan }}
-        runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
-        codeSection: 'console'
+  - template: pipes/scan-code-pipe.yml
+    parameters:
+      runGHASScan: ${{ parameters.runGHASScan }}
+      runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+      codeSection: 'console'
