@@ -40,10 +40,5 @@ stages:
 - template: pipes/console-app-pipe.yml
   parameters:
     environments: ['DEV']
-    projectPath: 'src/'
-    folderName: 'Durable.Tester'
-    projectName: 'Durable.Tester.csproj'
-    solutionName: 'Durable.Tester.sln'
-    exeName: 'Durable.Tester'
     runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
     runGHASScan: ${{ parameters.runGHASScan }}

@@ -26,27 +26,26 @@ jobs:
   displayName: Initialize Code Scans ${{parameters.codeSection}}
   environment: ${{ parameters.environmentName }}
 
-  variables:
-    # Bring in environment common variable file
-    - template: ../../vars/var-common.yml
-    - ${{ if eq(lower(parameters.codeSection), 'app') }}:
-      - template: ../../vars/var-source-location-app.yml
-    - ${{ if eq(lower(parameters.codeSection), 'console') }}:
-      - template: ../../vars/var-source-location-console.yml
-    # Bring in environment specific variable files
-    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
-      - template: ../../vars/var-demo.yml
-    - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
-      - template: ../../vars/var-dev.yml
-    - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
-      - template: ../../vars/var-qa.yml
-    - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
-      - template: ../../vars/var-prod.yml
-
 # ----------------------------------------------------------------------------------------------------
 - ${{ if eq(lower(parameters.runGHASScan), 'true') }}:
   - job: GHASScanJob${{parameters.codeSection}}
     displayName: GHAS Scan Job ${{parameters.codeSection}}
+    variables:
+      # Bring in environment common variable file
+      - template: ../../vars/var-common.yml
+      # - ${{ if eq(lower(parameters.codeSection), 'app') }}:
+      - template: ../../vars/var-source-location-app.yml
+      # - ${{ if eq(lower(parameters.codeSection), 'console') }}:
+      #   - template: ../../vars/var-source-location-console.yml
+      # Bring in environment specific variable files
+      - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+        - template: ../../vars/var-demo.yml
+      - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+        - template: ../../vars/var-dev.yml
+      - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+        - template: ../../vars/var-qa.yml
+      - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+        - template: ../../vars/var-prod.yml
     steps:
     # Very basic simple example that might work sometimes...
     # - task: AdvancedSecurity-Codeql-Init@1
@@ -64,6 +63,7 @@ jobs:
       inputs:
         script: |
           echo "parameters.continueOnScanError=${{ parameters.continueOnScanError }}"
+          echo "parameters.codeSection=${{ parameters.codeSection }}"
           echo "appProjectFolderName=$(appProjectFolderName)"
           echo "workingDirectoryInfra=$(workingDirectoryInfra)"
           echo "workingDirectoryIgnore=$(workingDirectoryIgnore)"
@@ -135,6 +135,22 @@ jobs:
 - ${{ if eq(lower(parameters.runMSDevSecOpsScan), 'true') }}:
   - job: DevSecOpsScanJob${{parameters.codeSection}}
     displayName: DevSecOps Scan Job ${{parameters.codeSection}}
+    variables:
+      # Bring in environment common variable file
+      - template: ../../vars/var-common.yml
+      # - ${{ if eq(lower(parameters.codeSection), 'app') }}:
+      - template: ../../vars/var-source-location-app.yml
+      # - ${{ if eq(lower(parameters.codeSection), 'console') }}:
+      #   - template: ../../vars/var-source-location-console.yml
+      # Bring in environment specific variable files
+      - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+        - template: ../../vars/var-demo.yml
+      - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+        - template: ../../vars/var-dev.yml
+      - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+        - template: ../../vars/var-qa.yml
+      - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+        - template: ../../vars/var-prod.yml
     steps:
     - bash: |
         echo "parameters.runMSDevSecOpsScan=${{parameters.runMSDevSecOpsScan}}"
