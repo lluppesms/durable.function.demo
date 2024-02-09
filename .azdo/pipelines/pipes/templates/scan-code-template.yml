@@ -93,14 +93,14 @@ jobs:
         command: 'restore'
         projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$$(appProjectExtension)'
 
-    - ${{ if eq(lower(parameters.appProjectExtension), 'csproj') }}:
+    - ${{ if eq(lower(variables.appProjectExtension), 'csproj') }}:
       - task: DotNetCoreCLI@2
         displayName: Build CS Project
         inputs:
           projects: '$(Build.SourcesDirectory)/$(appProjectFolderName)/*.$$(appProjectExtension)'
           arguments: '--output publish_output --configuration Release'
 
-    - ${{ if eq(lower(parameters.appProjectExtension), 'sqlproj') }}:
+    - ${{ if eq(lower(variables.appProjectExtension), 'sqlproj') }}:
       - task: VSBuild@1
         displayName: Build DacPac Project
         inputs:
@@ -118,7 +118,7 @@ jobs:
       # 3.  AutoBuild may not be suitable for your project. Replace the AutoBuild task in your pipeline with the normal build tasks
       #     to build your project. This will give you more control over the build steps.
       # I already built this in one of the previous steps, so I'm skipping this step.
-      # - ${{ if eq(lower(parameters.appProjectExtension), 'csproj') }}:
+      # - ${{ if eq(lower(variables.appProjectExtension), 'csproj') }}:
       #   - task: AdvancedSecurity-Codeql-Autobuild@1
       #     displayName: GHAS AutoBuild
       #     continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
