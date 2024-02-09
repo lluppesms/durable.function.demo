@@ -21,7 +21,7 @@ stages:
           environmentName: 'DEV'
           runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
           runGHASScan: ${{ parameters.runGHASScan }}
-          codePath: 'console'
+          codeSection: 'console'
 
 # ----------------------------------------------------------------------------------------------------
 - stage: BuildApplication
