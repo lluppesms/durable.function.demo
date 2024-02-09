@@ -36,9 +36,6 @@ stages:
     - template: pipes/templates/scan-code-template.yml
       parameters:
         environmentName: 'DEMO'
-        appFolderName: 'src/Durable.Demo'
-        appSolutionName: 'Durable.Demo'
-        appProjectFolderName: 'src/Durable.Demo'
         runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
         runGHASScan: ${{ parameters.runGHASScan }}
 
@@ -49,8 +46,8 @@ stages:
     - template: pipes/templates/build-function-template.yml
       parameters:
         environmentName: 'DEV'
-        appFolderName: 'src/Durable.Demo'
 
+# ----------------------------------------------------------------------------------------------------
 - ${{ if and(eq(lower(parameters.runMSDevSecOpsScan), 'false'), eq(lower(parameters.runGHASScan), 'false')) }}:
   - stage: BuildApplication
     displayName: Build Application
@@ -58,4 +55,3 @@ stages:
     - template: pipes/templates/build-function-template.yml
       parameters:
         environmentName: 'DEV'
-        appFolderName: 'src/Durable.Demo'
