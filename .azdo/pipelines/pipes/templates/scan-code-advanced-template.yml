@@ -92,10 +92,10 @@ jobs:
           echo "Build.SourcesDirectory=$(Build.SourcesDirectory)"
           echo "------------------------------------------------"
           echo "Directory of Project Files: $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}"
-          tree L -3 $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}
+          tree L -4 $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}
           echo "------------------------------------------------"
           echo "Directory of Full Staging Directory: $(Build.SourcesDirectory)"
-          tree -L 3 $(Build.SourcesDirectory)
+          tree -L 4 $(Build.SourcesDirectory)
       displayName: 'Display Variables and Tree'
       continueOnError: true
 
@@ -161,7 +161,7 @@ jobs:
         echo "continueAfterScanErrors=$(continueAfterScanErrors)"
         echo "parameters.continueOnScanError=${{parameters.continueOnScanError}}"
         echo "Directory Listing for $(Pipeline.Workspace)"
-        tree -L 3 $(Pipeline.Workspace)
+        tree -L 4 $(Pipeline.Workspace)
       displayName: 'Display Variables'
       continueOnError: true
     # - task: UseDotNet@2
@@ -205,7 +205,7 @@ jobs:
       inputs:
         script: |
           echo "Directory of pipeline workspace: $(Pipeline.Workspace)"
-          tree -L 3 $(Pipeline.Workspace)
+          tree -L 4 $(Pipeline.Workspace)
       displayName: 'Display Files'
       continueOnError: true
     - task: PublishBuildArtifacts@1

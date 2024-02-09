@@ -78,7 +78,7 @@ jobs:
           echo "requestedFor: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedFor)"
           echo "requestedForID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedForID)"
           echo "Directory of $(pipelineResourcePath):"
-          tree -L 3 $(Build.SourcesDirectory)
+          tree -L 4 $(Build.SourcesDirectory)
       displayName: 'Display Artifact Info'
       continueOnError: true
 
@@ -104,7 +104,7 @@ jobs:
         echo "environmentName=$(environmentName)"
         echo "functionAppName=$(functionAppName)"
         echo "Directory of pipeline workspace:"
-        tree -L 3 $(Pipeline.Workspace)
+        tree -L 4 $(Pipeline.Workspace)
     displayName: 'Display Variables and Tree'
     continueOnError: true
 

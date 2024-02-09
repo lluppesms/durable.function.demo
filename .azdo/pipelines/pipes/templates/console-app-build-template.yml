@@ -54,7 +54,7 @@ jobs:
     - task: CmdLine@2
       inputs:
         script: |
-          echo "environmentName=$(environmentName)"
+          echo "environmentName=${{ parameters.environmentName }}"
           echo "projectPath=$(projectPath)"
           echo "folderName=$(folderName)"
           echo "solutionName=$(solutionName)"
@@ -62,6 +62,10 @@ jobs:
           echo "solutionPathName=$(solutionPathName)"
           echo "projectPathName=$(projectPathName)"
           echo "exeName=$(exeName)"
+          echo "----------------------------------------"
+          echo "Display All Environment Variables:"
+          printenv | sort
+          echo "----------------------------------------"
           echo "Directory of projectPath:"
           dir "$(projectPath)" /s
       displayName: 'Display Variables and Tree'
