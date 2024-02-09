@@ -49,8 +49,8 @@ stages:
         codeSection: 'app'
 
 - ${{ if or(eq(parameters.sourceToScan, 'TESTER'), eq(parameters.sourceToScan, 'BOTH')) }}:
-  - stage: ScanApplicationTester
-    displayName: Scan Application Tester
+  - stage: ScanTester
+    displayName: Scan Tester
     jobs:
     - template: pipes/templates/scan-code-template.yml
       parameters:
