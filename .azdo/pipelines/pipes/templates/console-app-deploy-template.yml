@@ -79,9 +79,15 @@ jobs:
         echo "storageAccountName=$(storageAccountName)"
         echo "storageFolderName=$(storageFolderName)"
         echo "blobPrefix=$(blobPrefix)"
-        echo "Directory of pipeline workspace:"
+        echo "----------------------------------------"
+        echo "##[group]Display All Environment Variables:"
+        printenv | sort
+        echo "##[endgroup]"
+        echo "----------------------------------------"
+        echo "##[group]Directory of pipeline workspace:"
         tree $(System.ArtifactsDirectory)
         dir $(System.ArtifactsDirectory) /s
+        echo "##[endgroup]"
     displayName: 'Display Variables and Tree'
     continueOnError: true
 

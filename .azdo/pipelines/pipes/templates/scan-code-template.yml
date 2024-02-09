@@ -33,10 +33,10 @@ jobs:
     variables:
       # Bring in environment common variable file
       - template: ../../vars/var-common.yml
-      # - ${{ if eq(lower(parameters.codeSection), 'app') }}:
-      - template: ../../vars/var-source-location-app.yml
-      # - ${{ if eq(lower(parameters.codeSection), 'console') }}:
-      #   - template: ../../vars/var-source-location-console.yml
+      - ${{ if eq(lower(parameters.codeSection), 'app') }}:
+        - template: ../../vars/var-source-location-app.yml
+      - ${{ if eq(lower(parameters.codeSection), 'console') }}:
+        - template: ../../vars/var-source-location-console.yml
       # Bring in environment specific variable files
       - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
         - template: ../../vars/var-demo.yml
@@ -60,22 +60,31 @@ jobs:
     # - task: AdvancedSecurity-Publish@1 
 
     - task: CmdLine@2
+      displayName: 'Display Variables and Tree'
       inputs:
         script: |
           echo "parameters.continueOnScanError=${{ parameters.continueOnScanError }}"
           echo "parameters.codeSection=${{ parameters.codeSection }}"
+          echo "appFolderName=$(appFolderName)"
+          echo "appSolutionName=$(appSolutionName)"
+          echo "appProjectName=$(appProjectName)"
           echo "appProjectFolderName=$(appProjectFolderName)"
           echo "workingDirectoryInfra=$(workingDirectoryInfra)"
           echo "workingDirectoryIgnore=$(workingDirectoryIgnore)"
           echo "Project Path: $(Build.SourcesDirectory)/$(appProjectFolderName)/*.$(appProjectExtension)"
           echo "Build.SourcesDirectory=$(Build.SourcesDirectory)"
+          echo "----------------------------------------"
+          echo "##[group]Display All Environment Variables:"
+          printenv | sort
+          echo "##[endgroup]"
           echo "------------------------------------------------"
-          echo "Directory of Project Files: $(Build.SourcesDirectory)/$(appProjectFolderName)"
+          echo "##[group]Directory of Project Files: $(Build.SourcesDirectory)/$(appProjectFolderName)"
           tree -L 4 $(Build.SourcesDirectory)/$(appProjectFolderName)
+          echo "##[endgroup]"
           echo "------------------------------------------------"
-          echo "Directory of Full Staging Directory: $(Build.SourcesDirectory)"
+          echo "##[group]Directory of Full Staging Directory: $(Build.SourcesDirectory)"
           tree -L 4 $(Build.SourcesDirectory)
-      displayName: 'Display Variables and Tree'
+          echo "##[endgroup]"
       continueOnError: true
 
     - task: AdvancedSecurity-Codeql-Init@1
@@ -138,10 +147,10 @@ jobs:
     variables:
       # Bring in environment common variable file
       - template: ../../vars/var-common.yml
-      # - ${{ if eq(lower(parameters.codeSection), 'app') }}:
-      - template: ../../vars/var-source-location-app.yml
-      # - ${{ if eq(lower(parameters.codeSection), 'console') }}:
-      #   - template: ../../vars/var-source-location-console.yml
+      - ${{ if eq(lower(parameters.codeSection), 'app') }}:
+        - template: ../../vars/var-source-location-app.yml
+      - ${{ if eq(lower(parameters.codeSection), 'console') }}:
+        - template: ../../vars/var-source-location-console.yml
       # Bring in environment specific variable files
       - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
         - template: ../../vars/var-demo.yml
@@ -155,12 +164,18 @@ jobs:
     - bash: |
         echo "parameters.runMSDevSecOpsScan=${{parameters.runMSDevSecOpsScan}}"
         echo "parameters.continueOnScanError=${{parameters.continueOnScanError}}"
+        echo "sourceVariableFile=$(sourceVariableFile)"
         echo "appProjectFolderName=$(appProjectFolderName)"
         echo "workingDirectoryInfra=$(workingDirectoryInfra)"
         echo "workingDirectoryIgnore=$(workingDirectoryIgnore)"
-        echo "continueAfterScanErrors=$(continueAfterScanErrors)"
-        echo "Directory Listing for $(Pipeline.Workspace)"
+        echo "----------------------------------------"
+        echo "##[group]Display All Environment Variables:"
+        printenv | sort
+        echo "##[endgroup]"
+        echo "----------------------------------------"
+        echo "##[group]Directory Listing for $(Pipeline.Workspace)"
         tree -L 4 $(Pipeline.Workspace)
+        echo "##[endgroup]"
       displayName: 'Display Variables'
       continueOnError: true
 

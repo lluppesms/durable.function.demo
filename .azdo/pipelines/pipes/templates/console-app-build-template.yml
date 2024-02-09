@@ -28,7 +28,8 @@ parameters:
 
 # ------------------------------------------------------------------------------------------------------------------------
 jobs:
-  - job: Build
+  - job: BuildApp
+    displayName: 'Build App'
     variables:
       - group: CodeSigning
       # Bring in environment common variable file
@@ -45,30 +46,47 @@ jobs:
         - template: ../../vars/var-prod.yml
       - name: environmentName
         value: ${{ parameters.environmentName }}
+      - name: solutionPath
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
       - name: solutionPathName
-        value: '$(projectPath)$(folderName)/$(solutionName)'
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appSolutionName)' #\$(appProjectFolderName)\$(appSolutionName)'
+      - name: projectPath
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
       - name: projectPathName
-        value: '$(projectPath)$(folderName)/$(projectName)'
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appProjectName)' #\$(appProjectFolderName)\$(appProjectName)'
 
     steps:
     - task: CmdLine@2
+      displayName: 'Display Variables and Tree'
       inputs:
         script: |
           echo "environmentName=${{ parameters.environmentName }}"
-          echo "projectPath=$(projectPath)"
-          echo "folderName=$(folderName)"
-          echo "solutionName=$(solutionName)"
-          echo "projectName=$(projectName)"
+
+          echo "appFolderName=$(appFolderName)"
+          echo "appProjectFolderName=$(appProjectFolderName)"
+          echo "appSolutionName=$(appSolutionName)"
+          echo "appProjectName=$(appProjectName)"
+          echo "appProjectExtension=$(appProjectExtension)"
+          echo "exeName=$(exeName)"
+          echo "buildPlatform=$(buildPlatform)"
+          echo "buildConfiguration=$(buildConfiguration)"
+
+          echo "solutionPath=$(solutionPath)"
           echo "solutionPathName=$(solutionPathName)"
           echo "projectPathName=$(projectPathName)"
-          echo "exeName=$(exeName)"
+
           echo "----------------------------------------"
-          echo "Display All Environment Variables:"
+          echo "##[group]Display All Environment Variables:"
           printenv | sort
+          echo "##[endgroup]"
           echo "----------------------------------------"
-          echo "Directory of projectPath:"
-          dir "$(projectPath)" /s
-      displayName: 'Display Variables and Tree'
+          echo "##[group]Directory of solutionPath: $(solutionPath)"
+          dir "$(solutionPath)" /s
+          echo "##[endgroup]"
+          echo "----------------------------------------"
+          echo "##[group]Directory Listing for $(System.DefaultWorkingDirectory)"
+          dir "$(System.DefaultWorkingDirectory)" /s
+          echo "##[endgroup]"
       continueOnError: true
 
     - task: NuGetToolInstaller@1
@@ -84,12 +102,17 @@ jobs:
     - task: NuGetCommand@2
       displayName: 'NuGet Restore'
       inputs:
-        restoreSolution: '$(solutionPathName)'
+        restoreSolution: $(solutionPathName).sln
+
+    - task: UseDotNet@2
+      displayName: 'Use dotnet 6.0'
+      inputs:
+        version: 6.0.x
 
     - task: VSBuild@1
       displayName: 'Build Program'
       inputs:
-        solution: $(solutionPathName)
+        solution: $(solutionPathName).sln
         platform: $(buildPlatform)
         configuration: $(buildConfiguration)
 
@@ -104,42 +127,76 @@ jobs:
       displayName: Create win-x64 package
       inputs:
         command: publish
-        projects: $(projectPathName)
+        projects: $(projectPathName).$(appProjectExtension)
         packDirectory: 
         publishWebProjects: false
-        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)/packages'
+        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)\packages'
         zipAfterPublish: false
+
+    - task: CmdLine@2
+      displayName: 'Display files after build'
+      inputs:
+        script: |
+          echo "----------------------------------------"
+          echo "##[group]Directory of solutionPath: $(solutionPath)"
+          dir "$(solutionPath)" /s
+          echo "##[endgroup]"
+          echo "----------------------------------------"
+          echo "##[group]Directory of build.artifactstagingdirectory: $(build.artifactstagingdirectory)"
+          dir "$(build.artifactstagingdirectory)" /s
+          echo "##[endgroup]"
+      continueOnError: true
 
     - task: PowerShell@2
       displayName: 'Sign win-x64 application'
       inputs:
         targetType: 'inline'
         script: |
-          cd $(build.artifactstagingdirectory)/packages
-          azuresigntool sign $(folderName)/$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
+          cd $(build.artifactstagingdirectory)\packages
+          azuresigntool sign $(appProjectName)\$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
       continueOnError: true
+#     azuresigntool sign $(appProjectFolderName)\$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
 
     - task: PowerShell@2
       displayName: Move win-x64 package to Deploy Folder
       inputs:
         targetType: 'inline'
         script: |
-          cd $(build.artifactstagingdirectory)/packages
+          cd $(build.artifactstagingdirectory)\packages
           md Deploy
           cd Deploy
           md win-x64
           cd ..
-          move $(folderName)/$(exeName).exe $(build.artifactstagingdirectory)/packages/Deploy/win-x64/
+          move $(appProjectName)\$(exeName).exe $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+          move $(appProjectName)\$(exeName).pdb $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+          move $(appProjectName)\config.json $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
         errorActionPreference: 'continue'
         failOnStderr: false
+          # move $(appProjectFolderName)\$(exeName).exe $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+          # move $(appProjectFolderName)\$(exeName).pdb $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+          # move $(appProjectFolderName)\config.json $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+
+    - task: CmdLine@2
+      displayName: 'Display files after move'
+      inputs:
+        script: |
+          echo "----------------------------------------"
+          echo "##[group]Directory of solutionPath: $(solutionPath)"
+          dir "$(solutionPath)" /s
+          echo "##[endgroup]"
+          echo "----------------------------------------"
+          echo "##[group]Directory of build.artifactstagingdirectory: $(build.artifactstagingdirectory)"
+          dir "$(build.artifactstagingdirectory)" /s
+          echo "##[endgroup]"
+      continueOnError: true
 
     - task: DotNetCoreCLI@2
       displayName: Create Linux package
       inputs:
         command: publish
-        projects: $(projectPathName)
+        projects: $(projectPathName).$(appProjectExtension)
         publishWebProjects: false
-        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
+        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)\packages'
         zipAfterPublish: false
 
     - task: PowerShell@2
@@ -147,15 +204,30 @@ jobs:
       inputs:
         targetType: 'inline'
         script: |
-          cd $(build.artifactstagingdirectory)/packages
+          cd $(build.artifactstagingdirectory)\packages
           cd Deploy
           md Linux
           cd ..
-          move $(folderName)/$(exeName) $(build.artifactstagingdirectory)/packages/Deploy/Linux/
+          move $(appProjectName)\$(exeName) $(build.artifactstagingdirectory)\packages\Deploy\Linux\
         errorActionPreference: 'continue'
         failOnStderr: false
+       #   move $(appProjectFolderName)\$(exeName) $(build.artifactstagingdirectory)\packages\Deploy\Linux\
+
+    - task: CmdLine@2
+      displayName: 'Display files before publish'
+      inputs:
+        script: |
+          echo "----------------------------------------"
+          echo "##[group]Directory of solutionPath: $(solutionPath)"
+          dir "$(solutionPath)" /s
+          echo "##[endgroup]"
+          echo "----------------------------------------"
+          echo "##[group]Directory of build.artifactstagingdirectory: $(build.artifactstagingdirectory)"
+          dir "$(build.artifactstagingdirectory)" /s
+          echo "##[endgroup]"
+      continueOnError: true
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Deployed Artifacts'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/packages/Deploy'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\packages\Deploy'

@@ -82,6 +82,7 @@ jobs:
     displayName: GHAzDO Scan Job
     steps:
     - task: CmdLine@2
+      displayName: 'Display Variables and Tree'
       inputs:
         script: |
           echo "parameters.continueOnScanError=${{ parameters.continueOnScanError }}"
@@ -90,13 +91,18 @@ jobs:
           echo "parameters.workingDirectoryIgnore=${{ parameters.workingDirectoryIgnore }}"
           echo "Project Path: $(Build.SourcesDirectory)\${{ parameters.appProjectFolderName }}\*.{{ parameters.appProjectExtension }}"
           echo "Build.SourcesDirectory=$(Build.SourcesDirectory)"
+          echo "----------------------------------------"
+          echo "##[group]Display All Environment Variables:"
+          printenv | sort
+          echo "##[endgroup]"
           echo "------------------------------------------------"
-          echo "Directory of Project Files: $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}"
+          echo "##[group]Directory of Project Files: $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}"
           tree L -4 $(Build.SourcesDirectory)/${{ parameters.appProjectFolderName }}
+          echo "##[endgroup]"
           echo "------------------------------------------------"
-          echo "Directory of Full Staging Directory: $(Build.SourcesDirectory)"
+          echo "##[group]Directory of Full Staging Directory: $(Build.SourcesDirectory)"
           tree -L 4 $(Build.SourcesDirectory)
-      displayName: 'Display Variables and Tree'
+          echo "##[endgroup]"
       continueOnError: true
 
     - task: AdvancedSecurity-Codeql-Init@1
@@ -148,20 +154,22 @@ jobs:
 # ----------------------------------------------------------------------------------------------------
 - job: SecurityScanJob
   displayName: Run MS SecDevOps Scans
-  variables:
-    - name: continueAfterScanErrors
-      value: ${{ eq(parameters.continueOnScanError, 'true') }}
   steps:
   - ${{ if ne(lower(parameters.runMSDevSecOpsScan), 'none') }}:
     - bash: |
         echo "parameters.runMSDevSecOpsScan=${{parameters.runMSDevSecOpsScan}}"
-        echo "parameters.appProjectFolderName=${{parameters.appProjectFolderName}}"
-        echo "parameters.workingDirectoryInfra=${{parameters.workingDirectoryInfra}}"
-        echo "parameters.workingDirectoryIgnore=${{parameters.workingDirectoryIgnore}}"
-        echo "continueAfterScanErrors=$(continueAfterScanErrors)"
         echo "parameters.continueOnScanError=${{parameters.continueOnScanError}}"
-        echo "Directory Listing for $(Pipeline.Workspace)"
+        echo "appProjectFolderName=$(appProjectFolderName)"
+        echo "workingDirectoryInfra=$(workingDirectoryInfra)"
+        echo "workingDirectoryIgnore=$(workingDirectoryIgnore)"
+        echo "----------------------------------------"
+        echo "##[group]Display All Environment Variables:"
+        printenv | sort
+        echo "##[endgroup]"
+        echo "----------------------------------------"
+        echo "##[group]Directory Listing for $(Pipeline.Workspace)"
         tree -L 4 $(Pipeline.Workspace)
+        echo "##[endgroup]"
       displayName: 'Display Variables'
       continueOnError: true
     # - task: UseDotNet@2
@@ -204,8 +212,14 @@ jobs:
     - task: CmdLine@2
       inputs:
         script: |
-          echo "Directory of pipeline workspace: $(Pipeline.Workspace)"
+          echo "----------------------------------------"
+          echo "##[group]Display All Environment Variables:"
+          printenv | sort
+          echo "##[endgroup]"
+          echo "----------------------------------------"
+          echo "##[group]Directory of pipeline workspace: $(Pipeline.Workspace)"
           tree -L 4 $(Pipeline.Workspace)
+          echo "##[endgroup]"
       displayName: 'Display Files'
       continueOnError: true
     - task: PublishBuildArtifacts@1
@@ -278,7 +292,7 @@ jobs:
         categories: IaC,containers
         tools: templateanalyzer,terrascan
       env:
-        gdn_run_workingdirectory: ${{ parameters.workingDirectoryInfra }}
+        gdn_run_workingdirectory: $(workingDirectoryInfra)
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
@@ -298,7 +312,7 @@ jobs:
         categories: code,artifacts
         tools: eslint,binskim  # antimalware
       env:
-        gdn_run_workingdirectory: ${{ parameters.workingDirectoryInfra }}
+        gdn_run_workingdirectory: $(workingDirectoryInfra)
       continueOnError: ${{ eq(parameters.continueOnScanError, 'true') }}
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
@@ -319,7 +333,7 @@ jobs:
         categories: IaC,containers
         tools: templateanalyzer,terrascan
       env:
-        gdn_run_workingdirectory: ${{ parameters.appProjectFolderName }}
+        gdn_run_workingdirectory: $(appProjectFolderName)
     - task: PublishBuildArtifacts@1
       displayName: Publish Scan Results
       inputs:

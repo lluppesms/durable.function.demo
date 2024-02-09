@@ -40,8 +40,9 @@ jobs:
       functionAppName=$(echo "$(appName)-$(environmentName)" | tr '[:upper:]' '[:lower:]')
       echo "##vso[task.setvariable variable=functionAppName]$functionAppName"
       echo "----------------------------------------"
-      echo "Display Current Environment Variables:"
+      echo "##[group]Display All Environment Variables:"
       printenv | sort
+      echo "##[endgroup]"
     displayName: 'Create Variables'
 
   # ----------------------------------------------------------------------------------------------------
@@ -77,8 +78,14 @@ jobs:
           echo "sourceProvider: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.sourceProvider)"
           echo "requestedFor: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedFor)"
           echo "requestedForID: $(resources.pipeline.${{ parameters.pipelineResourceIdentifier }}.requestedForID)"
-          echo "Directory of $(pipelineResourcePath):"
+          echo "----------------------------------------"
+          echo "##[group]Display All Environment Variables:"
+          printenv | sort
+          echo "##[endgroup]"
+          echo "----------------------------------------"
+          echo "##[group]Directory of $(pipelineResourcePath):"
           tree -L 4 $(Build.SourcesDirectory)
+          echo "##[endgroup]"
       displayName: 'Display Artifact Info'
       continueOnError: true
 
@@ -93,19 +100,24 @@ jobs:
   # ----------------------------------------------------------------------------------------------------
 
   - task: CmdLine@2
+    displayName: 'Display Variables and Tree'
     inputs:
       script: |
         echo "Environment Specific Variables:"
         echo "  applicationCommonName=$(applicationCommonName)"
         echo "  envSpecificServiceEndpointName=$(envSpecificServiceEndpointName)"
-
         echo "serviceConnectionName=$(serviceConnectionName)"
         echo "azureSubscription=$(azureSubscription)"
         echo "environmentName=$(environmentName)"
         echo "functionAppName=$(functionAppName)"
-        echo "Directory of pipeline workspace:"
+        echo "----------------------------------------"
+        echo "##[group]Display All Environment Variables:"
+        printenv | sort
+        echo "##[endgroup]"
+        echo "----------------------------------------"
+        echo "##[group]Directory of pipeline workspace:"
         tree -L 4 $(Pipeline.Workspace)
-    displayName: 'Display Variables and Tree'
+        echo "##[endgroup]"
     continueOnError: true
 
   - task: AzureFunctionApp@1

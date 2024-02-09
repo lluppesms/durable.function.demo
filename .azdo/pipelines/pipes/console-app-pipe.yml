@@ -13,8 +13,8 @@ parameters:
 # ------------------------------------------------------------------------------------------------------------------------
 stages:
 - ${{ if or(eq(lower(parameters.runMSDevSecOpsScan), 'true'), eq(lower(parameters.runGHASScan), 'true')) }}:
-  - stage: BuildTester
-    displayName: Build Tester
+  - stage: ScanApplication
+    displayName: Scan Application
     jobs:
       - template: templates/scan-code-template.yml
         parameters:

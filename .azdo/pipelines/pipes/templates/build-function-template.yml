@@ -35,6 +35,10 @@ jobs:
       echo "Build.BuildId=$(Build.BuildId)"
       echo "appName=$(appName)"
       echo "appFolderName=$(appFolderName)"
+      echo "----------------------------------------"
+      echo "##[group]Display All Environment Variables:"
+      printenv | sort
+      echo "##[endgroup]"
     continueOnError: true
     displayName: 'Display Variables'
 
