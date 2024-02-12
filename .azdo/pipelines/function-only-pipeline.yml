@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------------------------------
 # Pipeline to deploy a Function App
-# See readme file for info about variable group "DurableDemo"
+# See readme file for info about the contents of the variable group
 # ----------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
@@ -10,20 +10,19 @@ variables:
 
 # ----------------------------------------------------------------------------------------------------
 trigger:
-  # since this repo has both AzDO and GHA pipelines, nothing is run automatically...
-  - none
-  # batch: true
-  # branches:
-  #   include:
-  #     - main
-  # paths:
-  #   include:
-  #     - FunctionApp
-  #   exclude: 
-  #     - '**/*.yml'
-  #     - '**/*.yaml'
-  #     - '**/*.bicep'
-  #     - '**/*.md'
+  # - none
+  batch: true
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/Durable.Demo
+    exclude: 
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.bicep'
+      - '**/*.md'
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
@@ -36,6 +35,7 @@ parameters:
       - QA
       - PROD
       - MULTIPLE
+    default: DEMO
   - name: runGHASScan
     displayName: Run GHAS Scan
     type: boolean

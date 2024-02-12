@@ -1,5 +1,11 @@
 # ----------------------------------------------------------------------------------------------------
-# Template to deploy Azure Resources for one environment
+# Template to deploy Azure Resources in a bicep file in one environment
+# This template is optimized for a Linux build agent -- see create-infra-win.yml for a Windows build agent
+# ----------------------------------------------------------------------------------------------------
+# I would love to use main.bicepparam file format instead of main.parameters.json, 
+# but the AzureResourceManagerTemplateDeployment@3 task does not support it yet... :(
+#   See https://github.com/microsoft/azure-pipelines-tasks/issues/18521
+#   The issue is in code review on Feb 9, 2024, so it should be coming soon...
 # ----------------------------------------------------------------------------------------------------
 parameters:
 - name: environmentName
@@ -8,6 +14,10 @@ parameters:
   default: 'infra/Bicep'
 - name: templateFileName
   default: 'main.bicep'
+- name: parameterFileName
+  default: 'main.parameters.json'  # default: 'main.bicepparam'
+- name: deploymentMode
+  default: 'Incremental'  # 'Incremental' | 'Complete' | 'Validation'
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
@@ -18,6 +28,19 @@ jobs:
 - job: CreateInfraJob
   displayName: Create Infrastructure
   variables:
+    - name: environmentName
+      value: ${{ parameters.environmentName }}
+    - name: environmentNameUpper
+      value: ${{ upper(parameters.environmentName) }}
+    - name: environmentNameLower
+      value: ${{ lower(parameters.environmentName) }}
+    - name: templateFile
+      value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.templateFileName }}'
+    - name: parameterFile
+      value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.parameterFileName }}'
+    - name: parameterFile
+      value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.parameterFileName }}'
+
     # Bring in environment common variable file
     - template: ../../vars/var-common.yml
     - template: ../../vars/var-source-location-console.yml
@@ -30,15 +53,8 @@ jobs:
       - template: ../../vars/var-qa.yml
     - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
       - template: ../../vars/var-prod.yml
-    - name: environmentNameUpper
-      value: ${{ upper(parameters.environmentName) }}
-    - name: environmentNameLower
-      value: ${{ lower(parameters.environmentName) }}
-    - name: templateFile
-      value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.templateFileName }}'
-    - name: compiledJsonFile
-      value: '${{ parameters.templateFolderName }}/compiled.json'
 
+  # ----------------------------------------------------------------------------------------------------
   steps:
   - bash: |
       appNameLower=$(echo "$(appName)" | tr '[:upper:]' '[:lower:]')
@@ -61,46 +77,43 @@ jobs:
     continueOnError: true
 
   - bash: |
-      echo "serviceConnectionName=$(serviceConnectionName)"
-      echo "resourceGroupName=$(resourceGroupName)"
-      echo "environmentNameUpper=$(environmentNameUpper)"
-      echo "environmentNameLower=$(environmentNameLower)"
-      echo "location=$(location)"
-      echo "appName=$(appName)"
-      echo "appNameLower=$(appNameLower)"
-      echo "storageSku=$(storageSku)"
-      echo "functionAppSku=$(functionAppSku)"
-      echo "functionAppSkuFamily=$(functionAppSkuFamily)"
-      echo "functionAppSkuTier=$(functionAppSkuTier)"
-      echo "keyVaultOwnerUserId=$(keyVaultOwnerUserId)"
-      echo "runDateTime=$(runDateTime)"
-      echo "runDateTimeZ=$(runDateTimeZ)"
-      echo "templateFile=$(templateFile)"
-      echo "compiledJsonFile=$(compiledJsonFile)"
-      echo "twilioAccountSid=$(twilioAccountSid:0:3)******"
-      echo "twilioAuthToken=$(twilioAuthToken:0:3)******"
-      echo "twilioPhoneNumber=$(twilioPhoneNumber:0:3)******"
-      echo "Resource Group Command:"
-      echo "  az group create --name $(resourceGroupName) --location $(location) --tags LastDeployed=$(runDateTime) Application=$(appName) Environment=$(environmentNameUpper)"
-      echo "Bicep Deploy Sample Command:"
-      echo "  az deployment group create -n main-deploy-$(runDateTimeZ) --resource-group $(resourceGroupName) --template-file 'main.bicep' --parameters environmentCode $(environmentNameLower) location $(location) appName $(appName) storageSku $(storageSku) functionAppSku $(functionAppSku) functionAppSkuFamily $(functionAppSkuFamily) functionAppSkuTier $(functionAppSkuTier) keyVaultOwnerUserId $(keyVaultOwnerUserId) twilioAccountSid $(twilioAccountSid) twilioAuthToken $(twilioAuthToken) twilioPhoneNumber $(twilioPhoneNumber) runDateTime $(runDateTime)"
-      echo "----------------------------------------"
+      echo "environmentName=${{ parameters.environmentName }}"
+      echo "templateFolderName=${{ parameters.templateFolderName }}"
+      echo "templateFileName=${{ parameters.templateFileName }}"
+      echo "parameterFileName=${{ parameters.parameterFileName }}"
+      echo "deploymentMode=${{ parameters.deploymentMode }}"
+
       echo "##[group]Display All Environment Variables:"
       printenv | sort
       echo "##[endgroup]"
+
       echo "----------------------------------------"
       echo "##[group]Directory of pipeline workspace:"
-      tree $(Pipeline.Workspace)
+      tree -L 4 $(Pipeline.Workspace)
       echo "##[endgroup]"
-    displayName: 'Display Variables'
+    displayName: 'Display Variables and Files'
     continueOnError: true
 
   # Login is needed if you are pulling Bicep files from an Azure Container Registry
   # -script: az login --service-principal -u $(principalId) -p $(clientSecret) --tenant $(tenantId)
   #   displayName: 'az login'
 
-  # - script: az bicep build --file $(templateFile) --outfile $(compiledJsonFile)
-  #   displayName: 'Compile Bicep file'
+  - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+    displayName: 'Update Parameter File'
+    inputs:
+      targetFiles: $(parameterFile)
+      tokenPrefix: '#{'
+      tokenSuffix: '}#'
+
+  - task: CmdLine@2
+    displayName: Display Parameter File Contents
+    continueOnError: true
+    inputs:
+      script: |
+        echo "Bicep File Name: $(templateFile)"
+        echo "##[group]Contents of Parameter File  $(parameterFile)"
+        cat  $(parameterFile)
+        echo "##[endgroup]"
 
   - task: AzureCLI@2
     displayName: 'Create Resource Group'
@@ -114,23 +127,16 @@ jobs:
     displayName: 'Publish Bicep Resources'
     inputs:
       csmFile: $(templateFile)
-      overrideParameters: >
-        -appName $(appName)
-        -environmentCode $(environmentNameLower)
-        -keyVaultOwnerUserId $(keyVaultOwnerUserId)
-        -location $(location)
-        -storageSku $(storageSku)
-        -functionAppSku $(functionAppSku)
-        -functionAppSkuFamily $(functionAppSkuFamily)
-        -functionAppSkuTier $(functionAppSkuTier)
-        -twilioAccountSid $(twilioAccountSid)
-        -twilioAuthToken $(twilioAuthToken)
-        -twilioPhoneNumber $(twilioPhoneNumber)
-        -runDateTime $(runDateTime)
+      csmParametersFile: $(parameterFile)
       deploymentScope: 'Resource Group'
       azureResourceManagerConnection: $(serviceConnectionName)
       action: 'Create Or Update Resource Group'
       resourceGroupName: '$(resourceGroupName)'
       location: '$(location)'
       templateLocation: 'Linked artifact'
-      deploymentMode: 'Incremental'
+      deploymentMode: '${{ parameters.deploymentMode }}'  # 'Incremental' | 'Complete' | 'Validation'
+
+  - bash: |
+      echo "WIPED!" > $(parameterFile)
+    displayName: 'Wipe Parameter File'
+    condition: always()

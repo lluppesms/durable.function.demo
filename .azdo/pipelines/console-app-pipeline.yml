@@ -10,19 +10,18 @@ variables:
 
 # ----------------------------------------------------------------------------------------------------
 trigger:
-  # since this repo has both AzDO and GHA pipelines, nothing is run automatically...
-  - none
-  # batch: true
-  # branches:
-  #   include: 
-  #     - main
-  # paths:
-  #   include:
-  #     - Simulator
-  #   exclude: 
-  #     - '**/*.yml'
-  #     - '**/*.yaml'
-  #     - '**/*.bicep'
+  # - none
+  batch: true
+  branches:
+    include: 
+      - main
+  paths:
+    include:
+      - src/Durable.Tester
+    exclude: 
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.bicep'
 
 # ----------------------------------------------------------------------------------------------------
 parameters:
