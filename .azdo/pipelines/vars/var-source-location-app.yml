@@ -8,17 +8,15 @@ variables:
     value: 'src/Durable.Demo'
   - name: appSolutionName
     value: 'Durable.Demo'
-  - name: appProjectFolderName
-    value: 'src/Durable.Demo'
-
-
-
-
-
   - name: appProjectName
     value: 'Durable.Tester'
+  - name: appProjectFolderName
+    value: 'src/Durable.Demo'
   - name: exeName
     value: 'Durable.Tester'
-
   - name: appProjectExtension
     value: 'csproj'
+  - name: buildPlatform
+    value: 'Any CPU'
+  - name: buildConfiguration
+    value: 'Release'
