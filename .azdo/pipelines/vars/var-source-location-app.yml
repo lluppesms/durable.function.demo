@@ -9,7 +9,7 @@ variables:
   - name: appSolutionName
     value: 'Durable.Demo'
   - name: appProjectName
-    value: 'Durable.Tester'
+    value: 'Durable.Demo'
   - name: appProjectFolderName
     value: 'src/Durable.Demo'
   - name: exeName
