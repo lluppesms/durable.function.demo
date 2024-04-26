@@ -15,7 +15,7 @@ parameters:
 - name: templateFileName
   default: 'main.bicep'
 - name: parameterFileName
-  default: 'main.parameters.json'  # default: 'main.bicepparam'
+  default: 'main.bicepparam' # 'main.parameters.json'
 - name: deploymentMode
   default: 'Incremental'  # 'Incremental' | 'Complete' | 'Validation'
 
