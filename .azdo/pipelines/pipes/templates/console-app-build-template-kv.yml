@@ -42,13 +42,13 @@ jobs:
       - name: environmentNameLower
         value: ${{ lower(parameters.environmentName) }}
       - name: solutionPath
-        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)'
       - name: solutionPathName
-        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appSolutionName)' #\$(appProjectFolderName)\$(appSolutionName)'
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appSolutionName)'
       - name: projectPath
-        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)'
       - name: projectPathName
-        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appProjectName)' #\$(appProjectFolderName)\$(appProjectName)'
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appProjectName)'
       - name: codeSignVaultUrl
         value: 'https://$(codeSignVaultName).vault.azure.net/'
 
