@@ -8,6 +8,8 @@
 
 [![deploy.infra.and.function](https://github.com/lluppesms/durable.function.demo/actions/workflows/deploy-infra-function.yml/badge.svg)](https://github.com/lluppesms/durable.function.demo/actions/workflows/deploy-infra-function.yml)
 
+[![Build Status](https://dev.azure.com/lyleluppes/GitHubDevOps/_apis/build/status%2Fdurable.Demo%2Fdurable.demo.infra.and.app?branchName=main)](https://dev.azure.com/lyleluppes/GitHubDevOps/_build/latest?definitionId=32&branchName=main)
+
 ---
 
 ## Overview
