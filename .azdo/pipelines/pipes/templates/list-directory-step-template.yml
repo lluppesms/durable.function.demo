@@ -1,0 +1,35 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to list files in a directory (or two directories)
+# ----------------------------------------------------------------------------------------------------
+parameters:
+  - name: stepName
+    default: 'List Files'
+  - name: directoryName
+    default: ''
+  - name: directoryName2
+    default: ''
+
+steps:
+- ${{ if eq(parameters.directoryName2, '') }}:
+  - task: CmdLine@2
+    displayName: ${{ parameters.stepName }}
+    inputs:
+      script: |
+        echo "##[group]Files in directory ${{ parameters.directoryName }}"
+        dir "${{ parameters.directoryName }}" /s
+        echo "##[endgroup]"
+    continueOnError: true
+
+- ${{ if ne(parameters.directoryName2, '') }}:
+  - task: CmdLine@2
+    displayName: ${{ parameters.stepName }}
+    inputs:
+      script: |
+        echo "##[group]Files in directory ${{ parameters.directoryName }}"
+        dir "${{ parameters.directoryName }}" /s
+        echo "##[endgroup]"
+
+        echo "##[group]Files in directory ${{ parameters.directoryName2 }}"
+        dir "${{ parameters.directoryName2 }}" /s
+        echo "##[endgroup]"
+    continueOnError: true

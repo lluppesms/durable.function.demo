@@ -2,11 +2,6 @@
 # Template to deploy Azure Resources in a bicep file in one environment
 # This template is optimized for a Linux build agent -- see create-infra-win.yml for a Windows build agent
 # ----------------------------------------------------------------------------------------------------
-# I would love to use main.bicepparam file format instead of main.parameters.json, 
-# but the AzureResourceManagerTemplateDeployment@3 task does not support it yet... :(
-#   See https://github.com/microsoft/azure-pipelines-tasks/issues/18521
-#   The issue is in code review on Feb 9, 2024, so it should be coming soon...
-# ----------------------------------------------------------------------------------------------------
 parameters:
 - name: environmentName
   default: 'DEV'
@@ -36,8 +31,6 @@ jobs:
       value: ${{ lower(parameters.environmentName) }}
     - name: templateFile
       value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.templateFileName }}'
-    - name: parameterFile
-      value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.parameterFileName }}'
     - name: parameterFile
       value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.parameterFileName }}'
 
@@ -98,7 +91,14 @@ jobs:
   # -script: az login --service-principal -u $(principalId) -p $(clientSecret) --tenant $(tenantId)
   #   displayName: 'az login'
 
-  - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+  # Note: this task @v6 changed the parameter NAME from targetFiles to sources
+  # - task: qetza.replacetokens.replacetokens-task.replacetokens@6
+  #   displayName: 'Create Parameter File'
+  #   inputs:
+  #     sources: $(parameterFile)
+  #     tokenPrefix: '#{'
+  #     tokenSuffix: '}#'
+  - task: qetza.replacetokens.replacetokens-task.replacetokens@5
     displayName: 'Update Parameter File'
     inputs:
       targetFiles: $(parameterFile)

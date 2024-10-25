@@ -1,0 +1,64 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to read secrets from a Key Vault, and to add and/or remove the Agent IP from the Key Vault FW
+# ----------------------------------------------------------------------------------------------------
+# Note: At times, you might want to leave the Agent FW in place until later, then remove it at the end of the pipeline.
+# In that case, specify the parameter "keepAgentFW" as "true" the first time you call it,
+# then call this template a second time with "removeAgentFW" as "true" and secretsToRetrieve as ""
+# ----------------------------------------------------------------------------------------------------
+# See: https://learn.microsoft.com/en-us/azure/devops/pipelines/release/key-vault-in-own-project
+# ----------------------------------------------------------------------------------------------------
+
+parameters:
+  - name: serviceConnectionName
+    default: ''
+  - name: vaultName
+    default: ''
+  - name: vaultResourceGroup
+    default: ''
+  - name: secretsToRetrieve
+    default: '*'
+  - name: keepAgentFW
+    default: 'false'
+  - name: removeAgentFW
+    default: 'false'
+
+steps:
+  # if there are secrets to find, then always run this step
+  - ${{ if ne(parameters.secretsToRetrieve, '') }}:
+    - task: AzurePowerShell@5
+      displayName: 'KV: Add Agent FW'
+      inputs:
+        AzureSubscription: ${{ parameters.serviceConnectionName }}
+        AzurePowerShellVersion: LatestVersion
+        ScriptType: InlineScript
+        Inline: |
+          $ip = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
+          echo "Executing: Add-AzKeyVaultNetworkRule -VaultName ${{ parameters.vaultName }} -ResourceGroupName ${{ parameters.vaultResourceGroup }} -IpAddressRange $ip"
+          Add-AzKeyVaultNetworkRule -VaultName ${{ parameters.vaultName }} -ResourceGroupName ${{ parameters.vaultResourceGroup }} -IpAddressRange $ip
+          echo "##vso[task.setvariable variable=agentIP]ip"
+
+  # if there are secrets to find, then always run this step
+  - ${{ if ne(parameters.secretsToRetrieve, '') }}:
+    - task: AzureKeyVault@2
+      displayName: 'KV: Get Secrets'
+      inputs:
+        AzureSubscription: ${{ parameters.serviceConnectionName }}
+        KeyVaultName: ${{ parameters.vaultName }}
+        SecretsFilter: ${{ parameters.secretsToRetrieve }}
+
+  # at times, you might want to leave the Agent FW in place until later, then remove it at the end of the pipeline
+  # in that case, specify the parameter "keepAgentFW" as "false" the first time
+  # then call this template a second time with "removeAgentFW" as "true" and secretsToRetrieve as ""
+  - ${{ if or(eq(lower(parameters.keepAgentFW), 'false'), eq(lower(parameters.removeAgentFW), 'true')) }}:
+    - task: AzurePowerShell@5
+      displayName: 'KV: Rmv Agent FW'
+      inputs:
+        AzureSubscription: ${{ parameters.serviceConnectionName }}
+        AzurePowerShellVersion: LatestVersion
+        ScriptType: InlineScript
+        Inline: |
+          $ipRange = $env:agentIP + "/32"
+          echo "Executing: Remove-AzKeyVaultNetworkRule -VaultName ${{ parameters.vaultName }} -IpAddressRange $ipRange"
+          Remove-AzKeyVaultNetworkRule -VaultName ${{ parameters.vaultName }} -IpAddressRange $ipRange
+      condition: succeededOrFailed()
+      

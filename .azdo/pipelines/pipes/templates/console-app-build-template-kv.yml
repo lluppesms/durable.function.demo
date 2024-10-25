@@ -1,0 +1,225 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline to build Test Utility; compiles for both Windows (x64) and Linux; copies EXE to storage for downloading ease
+# ------------------------------------------------------------------------------------------------------------------------
+# Note 1: In order to sign the code, this job needs the read the "CodeSigning" Key Vault,
+#   The variables codeSignVaultName and codeSignVaultResourceGroup to point to that vault.
+#   The KV should have these values:
+#     CertName: <Signing Cert Name>
+#     SigningAppRegAppId: <App Id that can read the vault>
+#     SigningAppRegClientSecret: <secret>
+#     ActiveDirectoryTenantId: <AD Tenant for the App Id>
+#     TimestampUrl: http://timestamp.digicert.com
+# See: https://learn.microsoft.com/en-us/azure/devops/pipelines/release/key-vault-access?pivots=access-from-azure-devops
+# ------------------------------------------------------------------------------------------------------------------------
+# Note 2: In order for AzFileCopy to work, you need to find the account that runs this pipeline, then add account
+#   to the storage account role "Storage Blob Data Owner"
+# ------------------------------------------------------------------------------------------------------------------------
+parameters:
+- name: environmentName
+  default:  'DEV'
+- name: showAdditionalInfo
+  default: false
+
+# ------------------------------------------------------------------------------------------------------------------------
+jobs:
+  - job: BuildApp
+    displayName: 'Build App'
+    variables:
+      # Bring in environment common variable file
+      - template: ../../vars/var-common.yml
+      - template: ../../vars/var-source-location-console.yml
+      # Bring in environment specific variable files
+      - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
+        - template: ../../vars/var-demo.yml
+      - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
+        - template: ../../vars/var-dev.yml
+      - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
+        - template: ../../vars/var-qa.yml
+      - ${{ if eq(lower(parameters.environmentName), 'prod') }}:
+        - template: ../../vars/var-prod.yml
+      - name: environmentName
+        value: ${{ parameters.environmentName }}
+      - name: environmentNameLower
+        value: ${{ lower(parameters.environmentName) }}
+      - name: solutionPath
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
+      - name: solutionPathName
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appSolutionName)' #\$(appProjectFolderName)\$(appSolutionName)'
+      - name: projectPath
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
+      - name: projectPathName
+        value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appProjectName)' #\$(appProjectFolderName)\$(appProjectName)'
+      - name: codeSignVaultUrl
+        value: 'https://$(codeSignVaultName).vault.azure.net/'
+
+    steps:
+    - template: read-keyvault-step-template.yml
+      # get the secrets, but leave the KV firewall rule in place until after the code signing step...
+      parameters:
+        serviceConnectionName: $(serviceConnectionName)
+        vaultName: $(codeSignVaultName)
+        vaultResourceGroup: $(codeSignVaultResourceGroup)
+        secretsToRetrieve: 'CertName,SigningAppRegAppId,SigningAppRegClientSecret,ActiveDirectoryTenantId,TimestampUrl'
+        keepAgentFW: 'true'
+    - task: CmdLine@2
+      displayName: 'Display Variables and Tree'
+      inputs:
+        script: |
+          echo "environmentName=${{ parameters.environmentName }}"
+
+          echo "appFolderName=$(appFolderName)"
+          echo "appProjectFolderName=$(appProjectFolderName)"
+          echo "appSolutionName=$(appSolutionName)"
+          echo "appProjectName=$(appProjectName)"
+          echo "appProjectExtension=$(appProjectExtension)"
+          echo "exeName=$(exeName)"
+          echo "buildPlatform=$(buildPlatform)"
+          echo "buildConfiguration=$(buildConfiguration)"
+          echo " "
+          echo "solutionPath=$(solutionPath)"
+          echo "solutionPathName=$(solutionPathName)"
+          echo "projectPathName=$(projectPathName)"
+          echo " "
+          echo "codeSignVaultName=$(codeSignVaultName)"
+          echo "codeSignVaultUrl=$(codeSignVaultUrl)"
+          echo "codeSignVaultResourceGroup=$(codeSignVaultResourceGroup)"
+          echo "KVS: CertName=$(CertName)"
+          echo "KVS: TimestampUrl=$(TimestampUrl)"
+          echo " "
+          echo "----------------------------------------"
+          echo "##[group]Display All Environment Variables:"
+          printenv | sort
+          echo "##[endgroup]"
+      continueOnError: true
+
+    - template: list-directory-step-template.yml
+      parameters:
+        stepName: 'List Files'
+        directoryName: $(System.DefaultWorkingDirectory)
+        directoryName2: $(build.artifactstagingdirectory)
+
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      displayName: 'NuGet Restore'
+      inputs:
+        restoreSolution: $(solutionPathName).sln
+
+    - task: UseDotNet@2
+      displayName: 'Use dotnet 8.0'
+      inputs:
+        version: 8.0.x
+
+    - task: VSBuild@1
+      displayName: 'Build Program'
+      inputs:
+        solution: $(solutionPathName).sln
+        platform: $(buildPlatform)
+        configuration: $(buildConfiguration)
+
+    #- task: VSTest@2
+    #  displayName: 'Test Program'
+    #  inputs:
+    #    platform: '$(buildPlatform)'
+    #    configuration: '$(buildConfiguration)'
+    #  continueOnError: true
+
+    - task: DotNetCoreCLI@2
+      displayName: Create win-x64 package
+      inputs:
+        command: publish
+        projects: $(projectPathName).$(appProjectExtension)
+        packDirectory: 
+        publishWebProjects: false
+        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net8.0 -r win-x64 --output $(build.artifactstagingdirectory)\packages'
+        zipAfterPublish: false
+
+    - ${{ if eq(parameters.showAdditionalInfo, true) }}:
+      - template: list-directory-step-template.yml
+        parameters:
+          stepName: 'List Files after build'
+          directoryName: $(System.DefaultWorkingDirectory)
+          directoryName2: $(build.artifactstagingdirectory)
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Install AzureSignTool'
+      inputs:
+        command: custom
+        custom: tool
+        arguments: 'install --global azuresigntool'
+      continueOnError: true
+
+    - task: PowerShell@2
+      displayName: 'Sign win-x64 application'
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd $(build.artifactstagingdirectory)\packages
+          azuresigntool sign $(appProjectName)\$(exeName).exe -kvu $(codeSignVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
+      continueOnError: true
+
+    # remove the KV firewall rule now
+    - template: read-keyvault-step-template.yml
+      parameters:
+        serviceConnectionName: $(serviceConnectionName)
+        vaultName: $(codeSignVaultName)
+        vaultResourceGroup: $(codeSignVaultResourceGroup)
+        secretsToRetrieve: ''
+        removeAgentFW: 'true'
+
+    - task: PowerShell@2
+      displayName: Move win-x64 package to Deploy Folder
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd $(build.artifactstagingdirectory)\packages
+          md Deploy
+          cd Deploy
+          md win-x64
+          cd ..
+          move $(appProjectName)\$(exeName).exe $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+          move $(appProjectName)\$(exeName).pdb $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+          move $(appProjectName)\config.json $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
+        errorActionPreference: 'continue'
+        failOnStderr: false
+
+    - ${{ if eq(parameters.showAdditionalInfo, true) }}:
+      - template: list-directory-step-template.yml
+        parameters:
+          stepName: 'List files after move'
+          directoryName: $(System.DefaultWorkingDirectory)
+          directoryName2: $(build.artifactstagingdirectory)
+
+    - task: DotNetCoreCLI@2
+      displayName: Create Linux package
+      inputs:
+        command: publish
+        projects: $(projectPathName).$(appProjectExtension)
+        publishWebProjects: false
+        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net8.0 -r linux-x64 --output $(build.artifactstagingdirectory)\packages'
+        zipAfterPublish: false
+
+    - task: PowerShell@2
+      displayName: Move Linux package to Deploy Folder
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd $(build.artifactstagingdirectory)\packages
+          cd Deploy
+          md Linux
+          cd ..
+          move $(appProjectName)\$(exeName) $(build.artifactstagingdirectory)\packages\Deploy\Linux\
+        errorActionPreference: 'continue'
+        failOnStderr: false
+
+    - ${{ if eq(parameters.showAdditionalInfo, true) }}:
+      - template: list-directory-step-template.yml
+        parameters:
+          stepName:  'Display files before publish'
+          directoryName: $(System.DefaultWorkingDirectory)
+          directoryName2: $(build.artifactstagingdirectory)
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Deployed Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\packages\Deploy'

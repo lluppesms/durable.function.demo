@@ -46,6 +46,8 @@ jobs:
         - template: ../../vars/var-prod.yml
       - name: environmentName
         value: ${{ parameters.environmentName }}
+      - name: environmentNameLower
+        value: ${{ lower(parameters.environmentName) }}
       - name: solutionPath
         value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
       - name: solutionPathName
@@ -54,6 +56,8 @@ jobs:
         value: '$(System.DefaultWorkingDirectory)\$(appFolderName)' # \$(appProjectFolderName)'
       - name: projectPathName
         value: '$(System.DefaultWorkingDirectory)\$(appFolderName)\$(appProjectName)' #\$(appProjectFolderName)\$(appProjectName)'
+      - name: codeSignVaultUrl
+        value: 'https://$(codeSignVaultName).vault.azure.net/'
 
     steps:
     - task: CmdLine@2
@@ -70,44 +74,40 @@ jobs:
           echo "exeName=$(exeName)"
           echo "buildPlatform=$(buildPlatform)"
           echo "buildConfiguration=$(buildConfiguration)"
-
+          echo " "
           echo "solutionPath=$(solutionPath)"
           echo "solutionPathName=$(solutionPathName)"
           echo "projectPathName=$(projectPathName)"
-
+          echo " "
+          echo "codeSignVaultName=$(codeSignVaultName)"
+          echo "codeSignVaultUrl=$(codeSignVaultUrl)"
+          echo "codeSignVaultResourceGroup=$(codeSignVaultResourceGroup)"
+          echo "KVS: CertName=$(CertName)"
+          echo "KVS: TimestampUrl=$(TimestampUrl)"
+          echo " "
           echo "----------------------------------------"
           echo "##[group]Display All Environment Variables:"
           printenv | sort
           echo "##[endgroup]"
-          echo "----------------------------------------"
-          echo "##[group]Directory of solutionPath: $(solutionPath)"
-          dir "$(solutionPath)" /s
-          echo "##[endgroup]"
-          echo "----------------------------------------"
-          echo "##[group]Directory Listing for $(System.DefaultWorkingDirectory)"
-          dir "$(System.DefaultWorkingDirectory)" /s
-          echo "##[endgroup]"
       continueOnError: true
+
+    - template: list-directory-step-template.yml
+      parameters:
+        stepName: 'List Files'
+        directoryName: $(System.DefaultWorkingDirectory)
+        directoryName2: $(build.artifactstagingdirectory)
 
     - task: NuGetToolInstaller@1
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Install AzureSignTool'
-      inputs:
-        command: custom
-        custom: tool
-        arguments: 'install --global azuresigntool'
-      continueOnError: true
-  
     - task: NuGetCommand@2
       displayName: 'NuGet Restore'
       inputs:
         restoreSolution: $(solutionPathName).sln
 
     - task: UseDotNet@2
-      displayName: 'Use dotnet 6.0'
+      displayName: 'Use dotnet 8.0'
       inputs:
-        version: 6.0.x
+        version: 8.0.x
 
     - task: VSBuild@1
       displayName: 'Build Program'
@@ -130,21 +130,22 @@ jobs:
         projects: $(projectPathName).$(appProjectExtension)
         packDirectory: 
         publishWebProjects: false
-        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)\packages'
+        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net8.0 -r win-x64 --output $(build.artifactstagingdirectory)\packages'
         zipAfterPublish: false
 
-    - task: CmdLine@2
-      displayName: 'Display files after build'
+    - ${{ if eq(lower(system.Debug, 'true')) }}:
+      - template: list-directory-step-template.yml
+        parameters:
+          stepName: 'List Files after build'
+          directoryName: $(System.DefaultWorkingDirectory)
+          directoryName2: $(build.artifactstagingdirectory)
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Install AzureSignTool'
       inputs:
-        script: |
-          echo "----------------------------------------"
-          echo "##[group]Directory of solutionPath: $(solutionPath)"
-          dir "$(solutionPath)" /s
-          echo "##[endgroup]"
-          echo "----------------------------------------"
-          echo "##[group]Directory of build.artifactstagingdirectory: $(build.artifactstagingdirectory)"
-          dir "$(build.artifactstagingdirectory)" /s
-          echo "##[endgroup]"
+        command: custom
+        custom: tool
+        arguments: 'install --global azuresigntool'
       continueOnError: true
 
     - task: PowerShell@2
@@ -153,9 +154,8 @@ jobs:
         targetType: 'inline'
         script: |
           cd $(build.artifactstagingdirectory)\packages
-          azuresigntool sign $(appProjectName)\$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
+          azuresigntool sign $(appProjectName)\$(exeName).exe -kvu $(codeSignVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
       continueOnError: true
-#     azuresigntool sign $(appProjectFolderName)\$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
 
     - task: PowerShell@2
       displayName: Move win-x64 package to Deploy Folder
@@ -172,23 +172,13 @@ jobs:
           move $(appProjectName)\config.json $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
         errorActionPreference: 'continue'
         failOnStderr: false
-          # move $(appProjectFolderName)\$(exeName).exe $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
-          # move $(appProjectFolderName)\$(exeName).pdb $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
-          # move $(appProjectFolderName)\config.json $(build.artifactstagingdirectory)\packages\Deploy\win-x64\
 
-    - task: CmdLine@2
-      displayName: 'Display files after move'
-      inputs:
-        script: |
-          echo "----------------------------------------"
-          echo "##[group]Directory of solutionPath: $(solutionPath)"
-          dir "$(solutionPath)" /s
-          echo "##[endgroup]"
-          echo "----------------------------------------"
-          echo "##[group]Directory of build.artifactstagingdirectory: $(build.artifactstagingdirectory)"
-          dir "$(build.artifactstagingdirectory)" /s
-          echo "##[endgroup]"
-      continueOnError: true
+    - ${{ if eq(lower(system.Debug, 'true')) }}:
+      - template: list-directory-step-template.yml
+        parameters:
+          stepName: 'List files after move'
+          directoryName: $(System.DefaultWorkingDirectory)
+          directoryName2: $(build.artifactstagingdirectory)
 
     - task: DotNetCoreCLI@2
       displayName: Create Linux package
@@ -196,7 +186,7 @@ jobs:
         command: publish
         projects: $(projectPathName).$(appProjectExtension)
         publishWebProjects: false
-        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)\packages'
+        arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net8.0 -r linux-x64 --output $(build.artifactstagingdirectory)\packages'
         zipAfterPublish: false
 
     - task: PowerShell@2
@@ -211,21 +201,13 @@ jobs:
           move $(appProjectName)\$(exeName) $(build.artifactstagingdirectory)\packages\Deploy\Linux\
         errorActionPreference: 'continue'
         failOnStderr: false
-       #   move $(appProjectFolderName)\$(exeName) $(build.artifactstagingdirectory)\packages\Deploy\Linux\
 
-    - task: CmdLine@2
-      displayName: 'Display files before publish'
-      inputs:
-        script: |
-          echo "----------------------------------------"
-          echo "##[group]Directory of solutionPath: $(solutionPath)"
-          dir "$(solutionPath)" /s
-          echo "##[endgroup]"
-          echo "----------------------------------------"
-          echo "##[group]Directory of build.artifactstagingdirectory: $(build.artifactstagingdirectory)"
-          dir "$(build.artifactstagingdirectory)" /s
-          echo "##[endgroup]"
-      continueOnError: true
+    - ${{ if eq(lower(system.Debug, 'true')) }}:
+      - template: list-directory-step-template.yml
+        parameters:
+          stepName:  'Display files before publish'
+          directoryName: $(System.DefaultWorkingDirectory)
+          directoryName2: $(build.artifactstagingdirectory)
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Deployed Artifacts'

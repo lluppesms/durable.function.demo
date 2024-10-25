@@ -55,6 +55,10 @@ This example sends a text message so you will want to have a Twilio account set 
          twilioAccountSid='<twilioAccountSid>'
          twilioAuthToken='<twilioAuthToken>'
          twilioPhoneNumber='<twilioPhoneNumber>'
+         codeSignVaultName='<yourInitials>codesignvault'
+         codeSignVaultResourceGroup='<rg_where_vault_lives>'
+         deployStorageAccountName='<yourInitials>downloads'
+         deployStorageAccountResourceGroup='<rg_where_storage_lives>'
 ```
 
 ---

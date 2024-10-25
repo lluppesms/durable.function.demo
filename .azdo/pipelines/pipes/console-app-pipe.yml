@@ -27,7 +27,8 @@ stages:
 - stage: BuildApplication
   displayName: Build Application
   jobs:
-  - template: templates/console-app-build-template.yml
+  #- template: templates/console-app-build-template-vg.yml
+  - template: templates/console-app-build-template-kv.yml
     parameters:
       environmentName: 'DEV'
 
@@ -36,6 +37,7 @@ stages:
   - stage: DeployTester${{ environmentName }}
     displayName: Deploy ${{ environmentName }} Tester
     jobs:
-    - template: templates/console-app-deploy-template.yml
+    #- template: templates/console-app-deploy-template-vg.yml
+    - template: templates/console-app-deploy-template-kv.yml
       parameters:
         environmentName: ${{ environmentName }}
