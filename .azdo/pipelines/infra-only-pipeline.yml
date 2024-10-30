@@ -5,8 +5,6 @@
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
   vmImage: ubuntu-latest
-variables:
-  - group: DurableDemo
 
 # ------------------------------------------------------------------------------------------------------------------------
 trigger:
@@ -28,12 +26,11 @@ parameters:
     displayName: Deploy To
     type: string
     values:
-      - DEMO
       - DEV
       - QA
       - PROD
-      - MULTIPLE
-    default: DEMO
+      - DEV-QA-PROD
+    default: DEV
   - name: runGHASScan
     displayName: Run GHAS Scan
     type: boolean
@@ -44,17 +41,23 @@ parameters:
     default: false
 
 # ----------------------------------------------------------------------------------------------------
+variables:
+  - group: DurableDemo
+  - template: vars/var-service-connections.yml
+
+# ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if ne(parameters.deployToEnvironment, 'MULTIPLE') }}:
+- ${{ if ne(parameters.deployToEnvironment, 'DEV-QA-PROD') }}:
   - template: pipes/infra-only-pipe.yml
     parameters:
       environments: ['${{ parameters.deployToEnvironment }}']
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}
+      singleEnvironment: 'true'
 
-- ${{ if eq(parameters.deployToEnvironment, 'MULTIPLE') }}:
+- ${{ if eq(parameters.deployToEnvironment, 'DEV-QA-PROD') }}:
   - template: pipes/infra-only-pipe.yml
     parameters:
-      environments: ['DEV','PROD']
+      environments: ['DEV','QA','PROD']
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}

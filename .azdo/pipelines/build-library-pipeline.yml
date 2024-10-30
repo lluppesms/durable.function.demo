@@ -7,6 +7,7 @@ pool:
   vmImage: ubuntu-latest
 variables:
   - group: DurableDemo
+  - template: vars/var-service-connections.yml
 
 # ----------------------------------------------------------------------------------------------------
 trigger:
@@ -41,7 +42,7 @@ stages:
     jobs:
     - template: pipes/templates/scan-code-template.yml@template.library
       parameters:
-        environmentName: 'DEMO'
+        environmentName: 'DEV'
         runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
         runGHASScan: ${{ parameters.runGHASScan }}
 

@@ -1,0 +1,32 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline Steps Template -- steps to build and deploy Azure Resources via Bicep File
+# ------------------------------------------------------------------------------------------------------------------------
+parameters:
+  - name: serviceConnectionName
+    default: ''
+  - name: deploymentMode
+    default: 'Incremental'  # 'Incremental' | 'Complete' | 'Validation'
+
+# ------------------------------------------------------------------------------------------------------------------------
+steps:
+  - task: AzureCLI@2
+    displayName: 'Create $(environmentName) Resource Group'
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: az group create --name $(resourceGroupName) --location $(location) --tags LastDeployed=$(runDateTime) Application=$(appName) Environment=$(environmentName)
+
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: 'Publish $(environmentName) Bicep Resources'
+    inputs:
+      csmFile: $(templateFile)
+      csmParametersFile: $(parameterFile)
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: ${{ parameters.serviceConnectionName }}
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: '$(resourceGroupName)'
+      location: '$(location)'
+      templateLocation: 'Linked artifact'
+      deploymentMode: '${{ parameters.deploymentMode }}'  # 'Incremental' | 'Complete' | 'Validation'
+

@@ -48,17 +48,19 @@ This example sends a text message so you will want to have a Twilio account set 
      --name DurableDemo 
      --variables 
          appName='<yourInitials>-durablea' 
-         serviceConnectionName='<yourServiceConnection>' 
-         azureSubscription='<yourAzureSubscriptionName>' 
-         subscriptionId='<yourSubscriptionId>' 
-         keyVaultOwnerUserId='owner1SID'
+         artifactStorageAccountName='<yourInitials>downloads'
+         artifactStorageAccountResourceGroup='<rg_where_storage_lives>'
+         codeSignVaultName='<myCodeSignVaultName>'
+         codeSignVaultResourceGroup='<rg_where_CodeSignVault_lives_>'
+         keyVaultOwnerUserId='<owner1SID>'
          twilioAccountSid='<twilioAccountSid>'
          twilioAuthToken='<twilioAuthToken>'
          twilioPhoneNumber='<twilioPhoneNumber>'
-         codeSignVaultName='<yourInitials>codesignvault'
-         codeSignVaultResourceGroup='<rg_where_vault_lives>'
-         deployStorageAccountName='<yourInitials>downloads'
-         deployStorageAccountResourceGroup='<rg_where_storage_lives>'
+         
+     --deprecated
+         serviceConnectionName='<yourServiceConnection>' 
+         subscriptionId='<yourSubscriptionId>' 
+
 ```
 
 ---

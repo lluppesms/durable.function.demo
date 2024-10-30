@@ -21,8 +21,6 @@ jobs:
     - template: ../../vars/var-common.yml
     - template: ../../vars/var-source-location-app.yml
     # Bring in environment specific variable files
-    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
-      - template: ../../vars/var-demo.yml
     - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
       - template: ../../vars/var-dev.yml
     - ${{ if eq(lower(parameters.environmentName), 'qa') }}:

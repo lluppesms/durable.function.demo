@@ -5,6 +5,8 @@ parameters:
 - name: environments
   type: object
   default: ['DEV']
+- name: singleEnvironment
+  default: 'false'
 - name: runGHASScan
   default: 'false'
 - name: runMSDevSecOpsScan
@@ -18,7 +20,7 @@ stages:
     jobs:
     - template: templates/scan-code-template.yml
       parameters:
-        environmentName: 'DEMO'
+        environmentName: 'DEV'
         runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
         runGHASScan: ${{ parameters.runGHASScan }}
 
@@ -32,20 +34,20 @@ stages:
 
 # ----------------------------------------------------------------------------------------------------
 - ${{ each environmentName in parameters.environments }} :
-  - stage: CreateInfrastructure${{ environmentName }}
+  - stage: CreateInfra${{ environmentName }}
     displayName: Create ${{ environmentName }} Resources
-    dependsOn: BuildApplication
-    condition: succeeded('BuildApplication')
+    # Condition is build complete and a single environment is being deployed, 
+    # or the environment is 'dev', or if qa/prod, the previous stage (dev->qa or qa->prod) succeeded
+    condition: or(eq(${{ parameters.singleEnvironment }}, 'true'), and(eq(upper('${{ environmentName }}'), 'DEV'), succeeded('BuildApplication')), and(eq(upper('${{ environmentName }}'), 'QA'), succeeded('DeployAppDEV')), and(eq(upper('${{ environmentName }}'), 'PROD'), succeeded('DeployAppQA')))
     jobs:
     - template: templates/create-infra-template.yml
       parameters:
         environmentName: ${{ environmentName }}
 
 # ----------------------------------------------------------------------------------------------------
-  - stage: Deploy${{ environmentName }}App
+  - stage: DeployApp${{ environmentName }}
     displayName: Deploy ${{ environmentName }} App
-    dependsOn: CreateInfrastructure${{ environmentName }}
-    condition: succeeded('CreateInfrastructure${{ environmentName }}')
+    condition: or(eq(${{ parameters.singleEnvironment }}, 'true'), and(eq(upper('${{ environmentName }}'), 'DEV'), succeeded('CreateInfraDEV')), and(eq(upper('${{ environmentName }}'), 'QA'), succeeded('CreateInfraQA')), and(eq(upper('${{ environmentName }}'), 'PROD'), succeeded('CreateInfraPROD')))
     jobs:
     - template: templates/deploy-function-template.yml
       parameters:

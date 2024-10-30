@@ -29,8 +29,6 @@ jobs:
       - template: ../../vars/var-common.yml
       - template: ../../vars/var-source-location-console.yml
       # Bring in environment specific variable files
-      - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
-        - template: ../../vars/var-demo.yml
       - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
         - template: ../../vars/var-dev.yml
       - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
@@ -53,7 +51,7 @@ jobs:
         value: 'https://$(codeSignVaultName).vault.azure.net/'
 
     steps:
-    - template: read-keyvault-step-template.yml
+    - template: steps-read-keyvault-template.yml
       # get the secrets, but leave the KV firewall rule in place until after the code signing step...
       parameters:
         serviceConnectionName: $(serviceConnectionName)
@@ -61,6 +59,7 @@ jobs:
         vaultResourceGroup: $(codeSignVaultResourceGroup)
         secretsToRetrieve: 'CertName,SigningAppRegAppId,SigningAppRegClientSecret,ActiveDirectoryTenantId,TimestampUrl'
         keepAgentFW: 'true'
+
     - task: CmdLine@2
       displayName: 'Display Variables and Tree'
       inputs:
@@ -141,6 +140,9 @@ jobs:
           directoryName: $(System.DefaultWorkingDirectory)
           directoryName2: $(build.artifactstagingdirectory)
 
+    # ----------------------------------------------------------------------------------------------------
+    # Sign code if vault with certificate was provided
+    # ----------------------------------------------------------------------------------------------------
     - task: DotNetCoreCLI@2
       displayName: 'Install AzureSignTool'
       inputs:
@@ -149,23 +151,25 @@ jobs:
         arguments: 'install --global azuresigntool'
       continueOnError: true
 
-    - task: PowerShell@2
-      displayName: 'Sign win-x64 application'
-      inputs:
-        targetType: 'inline'
-        script: |
-          cd $(build.artifactstagingdirectory)\packages
-          azuresigntool sign $(appProjectName)\$(exeName).exe -kvu $(codeSignVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
-      continueOnError: true
+    - ${{ if ne(variables.codeSignVaultUrl, 'NONE') }}:
+      - task: PowerShell@2
+        displayName: 'Sign win-x64 application'
+        inputs:
+          targetType: 'inline'
+          script: |
+            cd $(build.artifactstagingdirectory)\packages
+            azuresigntool sign $(appProjectName)\$(exeName).exe -kvu $(codeSignVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
+        continueOnError: true
 
     # remove the KV firewall rule now
-    - template: read-keyvault-step-template.yml
+    - template: steps-read-keyvault-template.yml
       parameters:
         serviceConnectionName: $(serviceConnectionName)
         vaultName: $(codeSignVaultName)
         vaultResourceGroup: $(codeSignVaultResourceGroup)
         secretsToRetrieve: ''
         removeAgentFW: 'true'
+    # ----------------------------------------------------------------------------------------------------
 
     - task: PowerShell@2
       displayName: Move win-x64 package to Deploy Folder

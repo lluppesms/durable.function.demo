@@ -35,11 +35,11 @@ jobs:
       value: '$(Pipeline.Workspace)/s/${{ parameters.templateFolderName }}/${{ parameters.parameterFileName }}'
 
     # Bring in environment common variable file
+    - template: ../../vars/var-service-connections.yml
     - template: ../../vars/var-common.yml
     - template: ../../vars/var-source-location-console.yml
+    
     # Bring in environment specific variable files
-    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
-      - template: ../../vars/var-demo.yml
     - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
       - template: ../../vars/var-dev.yml
     - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
@@ -87,17 +87,6 @@ jobs:
     displayName: 'Display Variables and Files'
     continueOnError: true
 
-  # Login is needed if you are pulling Bicep files from an Azure Container Registry
-  # -script: az login --service-principal -u $(principalId) -p $(clientSecret) --tenant $(tenantId)
-  #   displayName: 'az login'
-
-  # Note: this task @v6 changed the parameter NAME from targetFiles to sources
-  # - task: qetza.replacetokens.replacetokens-task.replacetokens@6
-  #   displayName: 'Create Parameter File'
-  #   inputs:
-  #     sources: $(parameterFile)
-  #     tokenPrefix: '#{'
-  #     tokenSuffix: '}#'
   - task: qetza.replacetokens.replacetokens-task.replacetokens@5
     displayName: 'Update Parameter File'
     inputs:
@@ -115,26 +104,18 @@ jobs:
         cat  $(parameterFile)
         echo "##[endgroup]"
 
-  - task: AzureCLI@2
-    displayName: 'Create Resource Group'
-    inputs:
-      azureSubscription: $(serviceConnectionName)
-      scriptType: bash
-      scriptLocation: inlineScript
-      inlineScript: az group create --name $(resourceGroupName) --location $(location) --tags LastDeployed=$(runDateTime) Application=$(appName) Environment=$(environmentNameUpper)
-
-  - task: AzureResourceManagerTemplateDeployment@3
-    displayName: 'Publish Bicep Resources'
-    inputs:
-      csmFile: $(templateFile)
-      csmParametersFile: $(parameterFile)
-      deploymentScope: 'Resource Group'
-      azureResourceManagerConnection: $(serviceConnectionName)
-      action: 'Create Or Update Resource Group'
-      resourceGroupName: '$(resourceGroupName)'
-      location: '$(location)'
-      templateLocation: 'Linked artifact'
-      deploymentMode: '${{ parameters.deploymentMode }}'  # 'Incremental' | 'Complete' | 'Validation'
+  - ${{ if eq(variables.environmentNameUpper, 'DEV') }}:
+    - template: steps-deploy-bicep-template.yml
+      parameters:
+        serviceConnectionName: $(serviceConnectionDEV)
+  - ${{ if eq(variables.environmentNameUpper, 'QA') }}:
+    - template: steps-deploy-bicep-template.yml
+      parameters:
+        serviceConnectionName: $(serviceConnectionQA)
+  - ${{ if eq(variables.environmentNameUpper, 'PROD') }}:
+    - template: steps-deploy-bicep-template.yml
+      parameters:
+        serviceConnectionName: $(serviceConnectionPROD)
 
   - bash: |
       echo "WIPED!" > $(parameterFile)

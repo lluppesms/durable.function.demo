@@ -24,8 +24,6 @@ jobs:
     - template: ../../vars/var-common.yml
     - template: ../../vars/var-source-location-console.yml
     # Bring in environment specific variable files
-    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
-      - template: ../../vars/var-demo.yml
     - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
       - template: ../../vars/var-dev.yml
     - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
@@ -56,10 +54,10 @@ jobs:
     inputs:
       script: |
         echo "environmentNameLower=$(environmentNameLower)"
-        echo "SubscriptionName=$(SubscriptionName)"
+        echo "serviceConnectionName=$(serviceConnectionName)"
         echo "resourceGroupName=$(resourceGroupName)"
-        echo "deployStorageAccountName=$(deployStorageAccountName)"
-        echo "deployStorageAccountResourceGroup=$(deployStorageAccountResourceGroup)"
+        echo "artifactStorageAccountName=$(artifactStorageAccountName)"
+        echo "artifactStorageAccountResourceGroup=$(artifactStorageAccountResourceGroup)"
         echo "storageFolderName=$(storageFolderName)"
         echo "blobPrefix=$(blobPrefix)"
         echo "----------------------------------------"
@@ -75,46 +73,52 @@ jobs:
       directoryName: $(System.DefaultWorkingDirectory)
       directoryName2: $(build.artifactstagingdirectory)
 
-  - task: AzurePowerShell@5
-    displayName: 'SA: Add Agent FW'
-    inputs:
-      AzureSubscription: $(SubscriptionName)
-      AzurePowerShellVersion: LatestVersion
-      ScriptType: InlineScript
-      Inline: |
-        $ip = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-        echo "Executing: Add-AzStorageAccountNetworkRule -Name $(deployStorageAccountName) -ResourceGroupName $(deployStorageAccountResourceGroup) -IpAddressRange $ip"
-        Add-AzStorageAccountNetworkRule -Name $(deployStorageAccountName) -ResourceGroupName $(deployStorageAccountResourceGroup) -IPAddressOrRange $ip
-        echo "##vso[task.setvariable variable=agentIP]ip"
+  - ${{ if ne(variables.artifactStorageAccountName, 'NONE') }}:
+    - task: AzurePowerShell@5
+      displayName: 'SA: Add Agent FW'
+      inputs:
+        AzureSubscription: $(serviceConnectionName)
+        AzurePowerShellVersion: LatestVersion
+        ScriptType: InlineScript
+        Inline: |
+          $ip = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
+          echo "Executing: Add-AzStorageAccountNetworkRule -Name $(artifactStorageAccountName) -ResourceGroupName $(artifactStorageAccountResourceGroup) -IpAddressRange $ip"
+          Add-AzStorageAccountNetworkRule -Name $(artifactStorageAccountName) -ResourceGroupName $(artifactStorageAccountResourceGroup) -IPAddressOrRange $ip
+          echo "##vso[task.setvariable variable=agentIP]ip"
 
-  - task: AzureFileCopy@6
-    displayName: 'AzureFileCopy: win-x64'
-    inputs:
-      SourcePath: '$(System.ArtifactsDirectory)/drop/win-x64'
-      azureSubscription: $(SubscriptionName)
-      Destination: AzureBlob
-      storage: $(deployStorageAccountName)
-      ContainerName: $(storageFolderName)
-      BlobPrefix: $(blobPrefix)
+    - task: AzureFileCopy@6
+      displayName: 'AzureFileCopy: win-x64'
+      inputs:
+        SourcePath: '$(System.ArtifactsDirectory)/drop/win-x64'
+        azureSubscription: $(serviceConnectionName)
+        Destination: AzureBlob
+        storage: $(artifactStorageAccountName)
+        ContainerName: $(storageFolderName)
+        BlobPrefix: $(blobPrefix)
 
-  - task: AzureFileCopy@6
-    displayName: 'AzureFileCopy: Linux'
-    inputs:
-      SourcePath: '$(System.ArtifactsDirectory)/drop/Linux'
-      azureSubscription: $(SubscriptionName)
-      Destination: AzureBlob
-      storage: $(deployStorageAccountName)
-      ContainerName: $(storageFolderName)
-      BlobPrefix: $(blobPrefix)
+    - task: AzureFileCopy@6
+      displayName: 'AzureFileCopy: Linux'
+      inputs:
+        SourcePath: '$(System.ArtifactsDirectory)/drop/Linux'
+        azureSubscription: $(serviceConnectionName)
+        Destination: AzureBlob
+        storage: $(artifactStorageAccountName)
+        ContainerName: $(storageFolderName)
+        BlobPrefix: $(blobPrefix)
 
-  - task: AzurePowerShell@5
-    displayName: 'SA: Rmv Agent FW'
-    inputs:
-      AzureSubscription: $(SubscriptionName)
-      AzurePowerShellVersion: LatestVersion
-      ScriptType: InlineScript
-      Inline: |
-        $ip = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
-        echo "Executing: Remove-AzStorageAccountNetworkRule -Name $(deployStorageAccountName) -ResourceGroupName $(deployStorageAccountResourceGroup) -IpAddressRange $ip"
-        Remove-AzStorageAccountNetworkRule -Name $(deployStorageAccountName) -ResourceGroupName $(deployStorageAccountResourceGroup) -IPAddressOrRange $ip
-    condition: succeededOrFailed()
+    - task: AzurePowerShell@5
+      displayName: 'SA: Rmv Agent FW'
+      inputs:
+        AzureSubscription: $(serviceConnectionName)
+        AzurePowerShellVersion: LatestVersion
+        ScriptType: InlineScript
+        Inline: |
+          $ip = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
+          echo "Executing: Remove-AzStorageAccountNetworkRule -Name $(artifactStorageAccountName) -ResourceGroupName $(artifactStorageAccountResourceGroup) -IpAddressRange $ip"
+          Remove-AzStorageAccountNetworkRule -Name $(artifactStorageAccountName) -ResourceGroupName $(artifactStorageAccountResourceGroup) -IPAddressOrRange $ip
+      condition: succeededOrFailed()
+
+  - ${{ if eq(variables.artifactStorageAccountName, '') }}:
+    - bash: |
+        echo "No artifact storage account was specified!"
+      displayName: 'No Artifact Storage!'

@@ -17,11 +17,10 @@ jobs:
   displayName: Deploy ${{ parameters.environmentName }} Function
   variables:
     # Bring in environment common variable file
+    - template: ../../vars/var-service-connections.yml
     - template: ../../vars/var-common.yml
     - template: ../../vars/var-source-location-app.yml
     # Bring in environment specific variable files
-    - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
-      - template: ../../vars/var-demo.yml
     - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
       - template: ../../vars/var-dev.yml
     - ${{ if eq(lower(parameters.environmentName), 'qa') }}:
@@ -105,9 +104,10 @@ jobs:
       script: |
         echo "Environment Specific Variables:"
         echo "  applicationCommonName=$(applicationCommonName)"
-        echo "  envSpecificServiceEndpointName=$(envSpecificServiceEndpointName)"
+        echo "  serviceConnectionDEV=$(serviceConnectionDEV)"
+        echo "  serviceConnectionQA=$(serviceConnectionQA)"
+        echo "  serviceConnectionPROD=$(serviceConnectionPROD)"
         echo "serviceConnectionName=$(serviceConnectionName)"
-        echo "azureSubscription=$(azureSubscription)"
         echo "environmentName=$(environmentName)"
         echo "functionAppName=$(functionAppName)"
         echo "----------------------------------------"
@@ -120,11 +120,15 @@ jobs:
         echo "##[endgroup]"
     continueOnError: true
 
-  - task: AzureFunctionApp@1
-    displayName: 'Function App Deploy'
-    retryCountOnTaskFailure: 2
-    inputs:
-      azureSubscription: $(azureSubscription)
-      appType: functionAppLinux
-      appName: $(functionAppName)
-      package: $(Pipeline.Workspace)/*.zip
+  - ${{ if eq(variables.environmentNameUpper, 'DEV') }}:
+    - template: steps-deploy-function-template.yml
+      parameters:
+        serviceConnectionName: $(serviceConnectionDEV)
+  - ${{ if eq(variables.environmentNameUpper, 'QA') }}:
+    - template: steps-deploy-function-template.yml
+      parameters:
+        serviceConnectionName: $(serviceConnectionQA)
+  - ${{ if eq(variables.environmentNameUpper, 'PROD') }}:
+    - template: steps-deploy-function-template.yml
+      parameters:
+        serviceConnectionName: $(serviceConnectionPROD)

@@ -61,7 +61,7 @@ jobs:
     uses: ./.github/workflows/template-create-infra.yml
     secrets: inherit
     with:
-      envCode: 'demo'
+      envCode: 'dev'
       securityScan: ${{ inputs.securityScan }}
       continueOnScanError: true
 

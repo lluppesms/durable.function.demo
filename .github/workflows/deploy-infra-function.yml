@@ -60,7 +60,7 @@ jobs:
     uses: ./.github/workflows/template-function-app-build.yml
     secrets: inherit
     with:
-      envCode: 'demo'
+      envCode: 'dev'
       rootDirectory: 'src/Durable.Demo'
       securityScan: ${{ inputs.securityScan }}
       continueOnScanError: true
@@ -73,7 +73,7 @@ jobs:
     uses: ./.github/workflows/template-create-infra.yml
     secrets: inherit
     with:
-      envCode: 'demo'
+      envCode: 'dev'
       securityScan: ${{ inputs.securityScan }}
       continueOnScanError: true
 
@@ -115,7 +115,7 @@ jobs:
     uses: ./.github/workflows/template-function-app-deploy.yml
     secrets: inherit
     with:
-      envCode: 'demo'
+      envCode: 'dev'
 
   deploy-app-dev:
     if: inputs.deployToDev == 'true'

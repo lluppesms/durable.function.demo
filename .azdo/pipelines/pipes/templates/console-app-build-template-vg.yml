@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # Note 1: In order to sign the code, this job needs the VariableGroup "CodeSigning" to work 
 #   The "CodeSigning" Variable Group should have these values:
-#     SubscriptionName: <ServiceConnectionName -> SubscriptionName -> for AzFileCopy>
+#     ServiceConnectionName: <ServiceConnectionName -> for AzFileCopy>
 #     KeyVaultUrl: https://<yourCertVaultName>.vault.azure.net/
 #     CertName: <Signing Cert Name>
 #     SigningAppRegAppId: <App Id that can read the vault>
@@ -20,7 +20,7 @@
 #   az login
 #   az devops configure --defaults organization=https://dev.azure.com/yourorg/
 #   az devops configure --defaults project='yourProjectName'
-#   az pipelines variable-group create --name CodeSigning --variables SubscriptionName=<serviceConnectionName> KeyVaultUrl=https://<yourCertVaultName>.vault.azure.net/ CertName=<certName> SigningAppRegAppId=<appId> SigningAppRegClientSecret=<clientSecret> ActiveDirectoryTenantId=<tenantId> TimestampUrl=: http://timestamp.digicert.com
+#   az pipelines variable-group create --name CodeSigning --variables ServiceConnectionName=<serviceConnectionName> KeyVaultUrl=https://<yourCertVaultName>.vault.azure.net/ CertName=<certName> SigningAppRegAppId=<appId> SigningAppRegClientSecret=<clientSecret> ActiveDirectoryTenantId=<tenantId> TimestampUrl=: http://timestamp.digicert.com
 # ------------------------------------------------------------------------------------------------------------------------
 parameters:
 - name: environmentName
@@ -36,8 +36,6 @@ jobs:
       - template: ../../vars/var-common.yml
       - template: ../../vars/var-source-location-console.yml
       # Bring in environment specific variable files
-      - ${{ if eq(lower(parameters.environmentName), 'demo') }}:
-        - template: ../../vars/var-demo.yml
       - ${{ if eq(lower(parameters.environmentName), 'dev') }}:
         - template: ../../vars/var-dev.yml
       - ${{ if eq(lower(parameters.environmentName), 'qa') }}:

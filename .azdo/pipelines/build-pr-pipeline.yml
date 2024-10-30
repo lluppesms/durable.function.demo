@@ -7,6 +7,7 @@ pool:
   vmImage: ubuntu-latest
 variables:
   - group: DurableDemo
+  - template: vars/var-service-connections.yml
 
 # ----------------------------------------------------------------------------------------------------
 # FYI - Set a required branch policy to run this on every check to main 

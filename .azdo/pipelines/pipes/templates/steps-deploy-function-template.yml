@@ -1,0 +1,17 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline Steps Template -- steps to deploy and Azure Function to a specific connection and app name
+# ------------------------------------------------------------------------------------------------------------------------
+parameters:
+  - name: serviceConnectionName
+    default: ''
+
+# ------------------------------------------------------------------------------------------------------------------------
+steps:
+  - task: AzureFunctionApp@1
+    displayName: 'Function App Deploy'
+    retryCountOnTaskFailure: 2
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionName }}
+      appType: functionAppLinux
+      appName: $(functionAppName)
+      package: $(Pipeline.Workspace)/*.zip

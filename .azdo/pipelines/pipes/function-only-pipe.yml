@@ -5,6 +5,8 @@ parameters:
 - name: environments
   type: object
   default: ['DEV']
+- name: singleEnvironment
+  default: 'false'
 - name: runGHASScan
   default: 'false'
 - name: runMSDevSecOpsScan
@@ -12,19 +14,19 @@ parameters:
 
 # ----------------------------------------------------------------------------------------------------
 stages:
-- ${{ if or(ne(lower(parameters.runMSDevSecOpsScan), 'none'), eq(lower(parameters.runGHASScan), 'true')) }}:
-  - stage: ScanApplication
-    displayName: Scan Application
-    jobs:
-      - template: templates/scan-code-template.yml
-        parameters:
-          environmentName: 'DEMO'
-          runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
-          runGHASScan: ${{ parameters.runGHASScan }}
+- stage: ScanApplication
+  displayName: Scan Application
+  jobs:
+    - template: templates/scan-code-template.yml
+      parameters:
+        environmentName: 'DEV'
+        runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
+        runGHASScan: ${{ parameters.runGHASScan }}
 
 # ----------------------------------------------------------------------------------------------------
 - stage: BuildApplication
   displayName: Build Application
+  dependsOn: ScanApplication
   jobs:
   - template: templates/build-function-template.yml
     parameters:
@@ -34,6 +36,9 @@ stages:
 - ${{ each environmentName in parameters.environments }} :
   - stage: DeployApp${{ environmentName }}
     displayName: Deploy ${{ environmentName }} App
+    # Condition is build complete and a single environment is being deployed, 
+    # or the environment is 'dev', or if qa/prod, the previous stage (dev->qa or qa->prod) succeeded
+    condition: or(eq(${{ parameters.singleEnvironment }}, 'true'), and(eq(upper('${{ environmentName }}'), 'DEV'), succeeded('BuildApplication')), and(eq(upper('${{ environmentName }}'), 'QA'), succeeded('DeployAppDEV')), and(eq(upper('${{ environmentName }}'), 'PROD'), succeeded('DeployAppQA')))
     jobs:
     - template: templates/deploy-function-template.yml
       parameters:

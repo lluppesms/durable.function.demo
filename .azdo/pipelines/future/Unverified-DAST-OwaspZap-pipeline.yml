@@ -7,7 +7,8 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-- group: DurableDemo
+  - group: DurableDemo
+  - template: vars/var-service-connections.yml
 
 steps:
 - task: owaspzap@1

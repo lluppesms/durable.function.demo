@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------------------------------------------------
 parameters:
 - name: runMSDevSecOpsScan
-  default: 'None'
+  default: 'false'
 - name: runGHASScan
   default: 'false'
 - name: codeSection
