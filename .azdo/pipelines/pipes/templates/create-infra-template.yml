@@ -122,6 +122,16 @@ jobs:
         serviceConnectionName: $(serviceConnectionPROD)
         parseBicepOutputs: ${{ parameters.parseBicepOutputs }}
 
+  # Be sure to set the "parseBicepOutputs: true" on the template above to get the outputs
+  - task: CmdLine@2
+    displayName: Display Bicep Outputs
+    continueOnError: true
+    inputs:
+      script: |
+        echo "bicepOutputs: $(bicepOutputs)"
+        echo "bicepOutputs-SUBSCRIPTION_ID:     $(bicepOutputs-SUBSCRIPTION_ID)"
+        echo "bicepOutputs-RESOURCE_GROUP_NAME: $(bicepOutputs-RESOURCE_GROUP_NAME)"
+
   - bash: |
       echo "WIPED!" > $(parameterFile)
     displayName: 'Wipe Parameter File'

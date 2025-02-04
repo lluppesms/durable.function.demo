@@ -181,3 +181,6 @@ module functionAppSettingsModule 'functionappsettings.bicep' = {
     }
   }
 }
+
+output SUBSCRIPTION_ID string = subscription().subscriptionId
+output RESOURCE_GROUP_NAME string = resourceGroup().name
