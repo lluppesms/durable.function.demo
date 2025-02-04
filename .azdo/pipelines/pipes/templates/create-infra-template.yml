@@ -10,7 +10,7 @@ parameters:
 - name: templateFileName
   default: 'main.bicep'
 - name: parameterFileName
-  default: 'main.bicepparam' # 'main.parameters.json'
+  default: 'main.bicepparam'
 - name: deploymentMode
   default: 'Incremental'  # 'Incremental' | 'Complete' | 'Validation'
 - name: parseBicepOutputs
@@ -89,6 +89,22 @@ jobs:
     displayName: 'Display Variables and Files'
     continueOnError: true
 
+    # this script version also works
+    # - script: |
+    #     for var in $(compgen -e); do
+    #       echo $var ${!var};
+    #     done
+    # and this PowerShell Script works too
+    # - task: PowerShell@2
+    #   inputs:
+    #     targetType: 'inline'
+    #     script: Get-ChildItem -Path Env:\ | Format-List
+    # - bash: |
+    #     echo "Display All Environment Variables:"
+    #     printenv | sort
+    #   displayName: 'Display Variables'
+    #   continueOnError: true
+
   - task: qetza.replacetokens.replacetokens-task.replacetokens@5
     displayName: 'Update Parameter File'
     inputs:
@@ -132,7 +148,10 @@ jobs:
         echo "bicepOutputs-SUBSCRIPTION_ID:     $(bicepOutputs-SUBSCRIPTION_ID)"
         echo "bicepOutputs-RESOURCE_GROUP_NAME: $(bicepOutputs-RESOURCE_GROUP_NAME)"
 
-  - bash: |
-      echo "WIPED!" > $(parameterFile)
+  - task: CmdLine@2
+    inputs:
+      script: |
+        echo "WIPED!" > $(parameterFile)
     displayName: 'Wipe Parameter File'
     condition: always()
+    continueOnError: true
