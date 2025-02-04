@@ -49,13 +49,15 @@ stages:
   - template: pipes/infra-and-function-pipe.yml
     parameters:
       environments: ['${{ parameters.deployToEnvironment }}']
+      singleEnvironment: 'true'
+      parseBicepOutputs: true
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}
-      singleEnvironment: 'true'
 
 - ${{ if eq(parameters.deployToEnvironment, 'DEV-QA-PROD') }}:
   - template: pipes/infra-and-function-pipe.yml
     parameters:
       environments: ['DEV','QA','PROD']
+      parseBicepOutputs: true
       runMSDevSecOpsScan: ${{ parameters.runMSDevSecOpsScan }}
       runGHASScan: ${{ parameters.runGHASScan }}

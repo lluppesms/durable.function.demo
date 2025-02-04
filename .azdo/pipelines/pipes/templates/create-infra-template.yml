@@ -13,6 +13,8 @@ parameters:
   default: 'main.bicepparam' # 'main.parameters.json'
 - name: deploymentMode
   default: 'Incremental'  # 'Incremental' | 'Complete' | 'Validation'
+- name: parseBicepOutputs
+  default: false
 
 # ----------------------------------------------------------------------------------------------------
 jobs:
@@ -108,14 +110,17 @@ jobs:
     - template: steps-deploy-bicep-template.yml
       parameters:
         serviceConnectionName: $(serviceConnectionDEV)
+        parseBicepOutputs: ${{ parameters.parseBicepOutputs }}
   - ${{ if eq(variables.environmentNameUpper, 'QA') }}:
     - template: steps-deploy-bicep-template.yml
       parameters:
         serviceConnectionName: $(serviceConnectionQA)
+        parseBicepOutputs: ${{ parameters.parseBicepOutputs }}
   - ${{ if eq(variables.environmentNameUpper, 'PROD') }}:
     - template: steps-deploy-bicep-template.yml
       parameters:
         serviceConnectionName: $(serviceConnectionPROD)
+        parseBicepOutputs: ${{ parameters.parseBicepOutputs }}
 
   - bash: |
       echo "WIPED!" > $(parameterFile)
